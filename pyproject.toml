@@ -1,0 +1,202 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "brain-mapping-toolkit"
+dynamic = ["version"]
+description = "GPU-accelerated toolkit for brain imaging analysis and visualization"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [
+    {name = "Brain Mapping Toolkit Team", email = "team@brain-mapping-toolkit.org"}
+]
+maintainers = [
+    {name = "Brain Mapping Toolkit Team", email = "team@brain-mapping-toolkit.org"}
+]
+keywords = [
+    "neuroscience", "neuroimaging", "fmri", "brain mapping", 
+    "visualization", "machine learning", "gpu acceleration"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Scientific/Engineering :: Medical Science Apps.",
+    "Topic :: Scientific/Engineering :: Visualization",
+    "Topic :: Scientific/Engineering :: Image Processing",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "numpy>=1.21.0",
+    "scipy>=1.7.0",
+    "nibabel>=3.2.0",
+    "matplotlib>=3.5.0",
+    "pandas>=1.3.0",
+    "scikit-learn>=1.0.0",
+]
+
+[project.optional-dependencies]
+gpu = [
+    "cupy-cuda11x>=10.0.0",
+    "numba>=0.56.0",
+]
+deep-learning = [
+    "torch>=1.10.0",
+    "torchvision>=0.11.0",
+]
+visualization = [
+    "vtk>=9.0.0",
+    "mayavi>=4.7.0",
+    "plotly>=5.0.0",
+]
+gui = [
+    "PyQt6>=6.2.0",
+]
+medical = [
+    "pydicom>=2.3.0",
+    "SimpleITK>=2.1.0",
+    "nipype>=1.8.0",
+]
+cloud = [
+    "boto3>=1.20.0",
+    "google-cloud-storage>=2.0.0",
+    "azure-storage-blob>=12.0.0",
+]
+dev = [
+    "pytest>=6.0.0",
+    "pytest-cov>=3.0.0",
+    "black>=22.0.0",
+    "flake8>=4.0.0",
+    "mypy>=0.910",
+    "sphinx>=4.0.0",
+    "sphinx-rtd-theme>=1.0.0",
+    "numpydoc>=1.4.0",
+]
+all = [
+    "brain-mapping-toolkit[gpu,deep-learning,visualization,gui,medical,cloud]",
+]
+
+[project.urls]
+Homepage = "https://brain-mapping-toolkit.org"
+Documentation = "https://brain-mapping-toolkit.readthedocs.io"
+Repository = "https://github.com/your-org/brain-mapping-toolkit"
+"Bug Tracker" = "https://github.com/your-org/brain-mapping-toolkit/issues"
+Discussions = "https://github.com/your-org/brain-mapping-toolkit/discussions"
+
+[project.scripts]
+brain-mapper = "brain_mapping.cli:main"
+brain-gui = "brain_mapping.gui:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools_scm]
+write_to = "src/brain_mapping/_version.py"
+
+[tool.black]
+line-length = 88
+target-version = ['py38', 'py39', 'py310', 'py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.flake8]
+max-line-length = 88
+extend-ignore = ["E203", "W503"]
+exclude = [
+    ".git",
+    "__pycache__",
+    "docs/source/conf.py",
+    "old",
+    "build",
+    "dist",
+    ".eggs",
+    "*.egg",
+]
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = [
+    "nibabel.*",
+    "mayavi.*",
+    "vtk.*",
+    "sklearn.*",
+    "torch.*",
+    "cupy.*",
+    "pydicom.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "--cov=brain_mapping",
+    "--cov-report=term-missing",
+    "--cov-report=html",
+    "--cov-report=xml",
+]
+testpaths = ["tests"]
+filterwarnings = [
+    "error",
+    "ignore::UserWarning",
+    "ignore::DeprecationWarning",
+]
+
+[tool.coverage.run]
+source = ["brain_mapping"]
+omit = [
+    "*/tests/*",
+    "*/test_*",
+    "setup.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\bProtocol\):",
+    "@(abc\.)?abstractmethod",
+]
