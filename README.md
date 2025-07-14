@@ -12,7 +12,7 @@ Brain mapping is critical for understanding neurological disorders, yet tools fo
 - **Multi-format Support**: DICOM, NIfTI, BIDS-compliant datasets
 - **FSL Integration**: Seamless preprocessing pipelines
 - **Quality Control**: Automated QC metrics and validation
-- **CUDA Acceleration**: GPU-powered processing for real-time analysis
+- **GPU Acceleration**: ROCm (AMD) and CUDA (NVIDIA) powered processing for real-time analysis
 
 ### 🎨 Cutting-edge Visualization
 - **3D Brain Rendering**: Interactive VTK/Mayavi-based visualization
@@ -47,6 +47,12 @@ conda activate brain-mapping
 
 # Install dependencies
 pip install -r requirements.txt
+
+# For AMD GPU users (Recommended)
+pip install torch torchvision --index-url https://download.pytorch.org/whl/rocm5.7
+
+# For NVIDIA GPU users  
+pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118
 
 # Install with development dependencies
 pip install -e ".[dev]"
@@ -236,11 +242,36 @@ This toolkit builds upon the excellent work of several open-source projects:
 - **[BrainIAK](https://brainiak.org/)**: Brain Imaging Analysis Kit
 - **[Nilearn](https://nilearn.github.io/)**: Machine learning for neuroimaging
 
+## 🔬 NeuroFusionLab: Cross-Species Integration
+
+We're developing **NeuroFusionLab**, a hybrid fork that combines this human brain mapping toolkit with [FlyBrainLab](https://github.com/FlyBrainLab/FlyBrainLab) for comparative neuroscience research.
+
+### Key Features of NeuroFusionLab:
+- **Cross-Species Analysis**: Compare human and fruit fly brain circuits
+- **Homology Mapping**: Identify evolutionary neural relationships  
+- **Unified Visualization**: Side-by-side 3D rendering of different species
+- **Comparative Connectivity**: Analyze connectivity patterns across evolution
+- **JupyterLab Integration**: Interactive notebooks for comparative analysis
+
+### Getting Started with NeuroFusionLab:
+
+```bash
+# Fork strategy (detailed in docs/neurofusion-fork-strategy.md)
+git clone https://github.com/your-org/NeuroFusionLab.git
+cd NeuroFusionLab
+
+# Follow installation instructions in docs/neurofusion-fork-strategy.md
+```
+
+For detailed implementation plans and technical architecture, see:
+- `docs/neurofusion-fork-strategy.md` - Complete fork integration strategy
+- `docs/amd-rocm-setup.md` - AMD GPU optimization guide
+
 ### Funding and Support
 - **NIH BRAIN Initiative**: Grant U01-EB025162
 - **NSF**: Award 2112455
 - **Intel Corporation**: Hardware and optimization support
-- **NVIDIA**: GPU computing resources
+- **AMD**: ROCm GPU computing resources
 
 ### Contributors
 Special thanks to our amazing community of developers, researchers, and users who make this project possible.
