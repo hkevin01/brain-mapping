@@ -1,12 +1,12 @@
-# Open-Source Brain Mapping Toolkit
+# Brain Mapping Toolkit - Phase 1
 
-A comprehensive, GPU-accelerated toolkit for integrating and visualizing large-scale brain imaging data (fMRI, DTI) in 3D, designed to democratize access to advanced brain mapping tools for researchers and clinicians worldwide.
+A comprehensive, GPU-accelerated toolkit for neuroimaging analysis with FSL integration, quality control, and advanced visualization capabilities. Phase 1 focuses on core foundation components.
 
-## 🧠 Vision
+## 🧠 Phase 1 Vision
 
-Brain mapping is critical for understanding neurological disorders, yet tools for integrating and visualizing such data are often complex or inaccessible. This toolkit bridges that gap by providing an intuitive, high-performance platform for neuroscience research and clinical applications.
+Phase 1 provides essential neuroimaging analysis tools with FSL preprocessing, quality control validation, glass brain projections, and multi-planar reconstruction. Designed for researchers and clinicians who need reliable, easy-to-use brain mapping capabilities.
 
-## ✨ Key Features
+## ✨ Phase 1 Features
 
 ### 🔬 Advanced Data Processing
 - **Multi-format Support**: DICOM, NIfTI, BIDS-compliant datasets
