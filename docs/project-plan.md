@@ -307,13 +307,13 @@ src/
 - [ ] Predictive modeling
 - [ ] Personalized medicine
 
-### Cross-Species Integration (NeuroFusionLab Fork)
+### Cross-Species Integration (ComparativeNeuroLab Fork)
 - [ ] FlyBrainLab integration for comparative neuroscience
 - [ ] Cross-species homology mapping
 - [ ] Unified visualization of human and fly brain data
 - [ ] Comparative circuit analysis
 - [ ] Evolutionary neuroscience workflows
-- [ ] See `docs/neurofusion-fork-strategy.md` for detailed implementation plan
+- [ ] See `docs/comparative-neurolab-fork-strategy.md` for detailed implementation plan
 
 ## Conclusion
 

@@ -242,29 +242,29 @@ This toolkit builds upon the excellent work of several open-source projects:
 - **[BrainIAK](https://brainiak.org/)**: Brain Imaging Analysis Kit
 - **[Nilearn](https://nilearn.github.io/)**: Machine learning for neuroimaging
 
-## 🔬 NeuroFusionLab: Cross-Species Integration
+## 🔬 ComparativeNeuroLab: Cross-Species Integration
 
-We're developing **NeuroFusionLab**, a hybrid fork that combines this human brain mapping toolkit with [FlyBrainLab](https://github.com/FlyBrainLab/FlyBrainLab) for comparative neuroscience research.
+We're developing **ComparativeNeuroLab**, a hybrid fork that combines this human brain mapping toolkit with [FlyBrainLab](https://github.com/FlyBrainLab/FlyBrainLab) for comparative neuroscience research.
 
-### Key Features of NeuroFusionLab:
+### Key Features of ComparativeNeuroLab:
 - **Cross-Species Analysis**: Compare human and fruit fly brain circuits
 - **Homology Mapping**: Identify evolutionary neural relationships  
 - **Unified Visualization**: Side-by-side 3D rendering of different species
 - **Comparative Connectivity**: Analyze connectivity patterns across evolution
 - **JupyterLab Integration**: Interactive notebooks for comparative analysis
 
-### Getting Started with NeuroFusionLab:
+### Getting Started with ComparativeNeuroLab:
 
 ```bash
-# Fork strategy (detailed in docs/neurofusion-fork-strategy.md)
-git clone https://github.com/your-org/NeuroFusionLab.git
-cd NeuroFusionLab
+# Fork strategy (detailed in docs/comparative-neurolab-fork-strategy.md)
+git clone https://github.com/your-org/ComparativeNeuroLab.git
+cd ComparativeNeuroLab
 
-# Follow installation instructions in docs/neurofusion-fork-strategy.md
+# Follow installation instructions in docs/comparative-neurolab-fork-strategy.md
 ```
 
 For detailed implementation plans and technical architecture, see:
-- `docs/neurofusion-fork-strategy.md` - Complete fork integration strategy
+- `docs/comparative-neurolab-fork-strategy.md` - Complete fork integration strategy
 - `docs/amd-rocm-setup.md` - AMD GPU optimization guide
 
 ### Funding and Support
