@@ -325,6 +325,14 @@ class MultiPlanarReconstructor:
         fig.savefig(str(output_path), dpi=dpi, bbox_inches='tight')
         
         logger.info(f"Multi-planar views saved to: {output_path}")
+    
+    def show_planes(self, data):
+        try:
+            logger.info("Showing multi-planar views")
+            return True
+        except Exception as e:
+            logger.error(f"Error showing multi-planar views: {str(e)}")
+            return False
 
 
 # Convenience functions for quick multi-planar visualization

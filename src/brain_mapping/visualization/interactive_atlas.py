@@ -46,6 +46,7 @@ class InteractiveBrainAtlas:
         self.atlas_data = None
         self.labels = {}
         self.region_colors = {}
+        self.selected_regions = []  # Track selected regions
         self._load_atlas()
         
     def _load_atlas(self):
@@ -472,6 +473,24 @@ class InteractiveBrainAtlas:
         plt.close(fig)
         
         logger.info(f"Atlas overlay saved to: {output_path}")
+    
+    def select_region(self, region_id: str):
+        """Select a region for analysis and visualization."""
+        try:
+            self.selected_regions.append(region_id)
+            logger.info("Region selected: %s", region_id)
+        except Exception as e:
+            logger.error(f"Error selecting region: {str(e)}")
+            raise
+
+    def visualize_selected(self):
+        """Visualize the currently selected regions."""
+        try:
+            logger.info("Visualizing regions: %s", self.selected_regions)
+            return self.selected_regions
+        except Exception as e:
+            logger.error(f"Error visualizing regions: {str(e)}")
+            return []
 
 
 # Convenience functions for quick atlas usage

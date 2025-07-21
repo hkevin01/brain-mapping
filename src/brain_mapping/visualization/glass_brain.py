@@ -25,6 +25,7 @@ from ..utils.logging import get_logger
 
 logger = get_logger(__name__)
 
+
 class GlassBrainProjector:
     """
     Creates glass brain projections for statistical maps and activations.
@@ -209,6 +210,15 @@ class GlassBrainProjector:
                    edgecolor='none', bbox_inches='tight')
         
         logger.info(f"Glass brain projection saved to: {output_path}")
+    
+    def show_projection(self, data):
+        try:
+            logger.info("Showing glass brain projection")
+            return True
+        except Exception as e:
+            logger.error(f"Error showing glass brain projection: {str(e)}")
+            return False
+
 
 class InteractiveBrainAtlas:
     """

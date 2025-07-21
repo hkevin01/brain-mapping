@@ -6,6 +6,8 @@ import time
 
 
 class APIMonitor:
+    """Monitor API usage and log requests/responses."""
+
     def __init__(self):
         self.logs = []
 
