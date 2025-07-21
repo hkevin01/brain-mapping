@@ -13,8 +13,12 @@ import logging
 from pathlib import Path
 from typing import Dict, List, Optional, Union, Tuple
 import numpy as np
+from .provenance import ProvenanceTracker
 
 logger = logging.getLogger(__name__)
+
+# Initialize provenance tracker for FSL integration
+provenance_tracker = ProvenanceTracker()
 
 
 class FSLIntegration:
@@ -29,6 +33,11 @@ class FSLIntegration:
         Args:
             fsl_dir: Path to FSL installation directory
         """
+        provenance_tracker.log_event(
+            "init_fsl_integration",
+            {}
+        )
+        
         self.fsl_dir = fsl_dir or os.environ.get('FSLDIR')
         self.fsl_available = self._check_fsl_availability()
         
@@ -76,6 +85,18 @@ class FSLIntegration:
         
         # Add brain mask output
         cmd.extend(['-m'])  # Generate brain mask
+        
+        # Log provenance event
+        provenance_tracker.log_event(
+            "fsl_workflow",
+            {
+                "step": "skull_strip",
+                "input": str(input_path),
+                "output": str(output_path),
+                "fractional_intensity": fractional_intensity,
+                "robust": robust
+            }
+        )
         
         try:
             logger.info(f"Running skull stripping: {' '.join(cmd)}")

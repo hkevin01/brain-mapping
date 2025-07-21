@@ -13,12 +13,17 @@ from typing import Union, List, Dict, Optional, Tuple
 import numpy as np
 import nibabel as nib
 
+from .provenance import ProvenanceTracker
+
 try:
     import pydicom
     DICOM_AVAILABLE = True
 except ImportError:
     DICOM_AVAILABLE = False
     warnings.warn("pydicom not available. DICOM support disabled.")
+
+# Initialize provenance tracker for data loader
+provenance_tracker = ProvenanceTracker()
 
 class DataLoader:
     """
@@ -31,26 +36,34 @@ class DataLoader:
     - Custom data validation
     """
     
-    def __init__(self, validate_data: bool = True):
+    def __init__(self, data_root: Union[str, Path], validate_data: bool = True):
         """
         Initialize DataLoader.
         
         Parameters
         ----------
+        data_root : str or Path
+            Root directory for the data to be loaded
         validate_data : bool, default=True
             Whether to validate loaded data integrity
         """
+        self.data_root = Path(data_root)
         self.validate_data = validate_data
         self.supported_formats = ['.nii', '.nii.gz', '.dcm']
         
-    def load(self, file_path: Union[str, Path]) -> nib.Nifti1Image:
+        provenance_tracker.log_event(
+            "init_data_loader",
+            {"data_root": str(self.data_root)}
+        )
+    
+    def load(self, file_name: str) -> nib.Nifti1Image:
         """
         Load neuroimaging data from file.
         
         Parameters
         ----------
-        file_path : str or Path
-            Path to the neuroimaging file
+        file_name : str
+            Name of the neuroimaging file
             
         Returns
         -------
@@ -64,7 +77,7 @@ class DataLoader:
         ValueError
             If file format not supported
         """
-        file_path = Path(file_path)
+        file_path = self.data_root / file_name
         
         if not file_path.exists():
             raise FileNotFoundError(f"File not found: {file_path}")
@@ -81,6 +94,10 @@ class DataLoader:
         """Load NIfTI file."""
         try:
             img = nib.load(str(file_path))
+            provenance_tracker.log_event(
+                "data_loaded",
+                {"source": "nifti", "file": str(file_path)}
+            )
             if self.validate_data:
                 self._validate_nifti(img)
             return img

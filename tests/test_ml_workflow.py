@@ -2,6 +2,7 @@ import numpy as np
 import pytest
 
 from brain_mapping.analysis.ml_workflow import MLWorkflowManager
+from src.brain_mapping.core.provenance import ProvenanceTracker
 
 
 @pytest.mark.skipif(not hasattr(np, 'zeros'), reason="NumPy not available")
@@ -67,9 +68,19 @@ def test_invalid_model_type():
         MLWorkflowManager(model_type='torch')
 
 
+def test_ml_workflow_provenance():
+    tracker = ProvenanceTracker()
+    tracker.log_event(
+        "ml_workflow",
+        {"model": "TestModel", "params": {"alpha": 0.1}}
+    )
+    events = tracker.get_events()
+    assert any(e["event_type"] == "ml_workflow" for e in events)
+
+
 # Log this test addition
 with open('logs/CHANGELOG_AUTOMATED.md', 'a') as logf:
     logf.write(
         "- [2025-07-20 22:57] Added tests for MLWorkflowManager: init, analysis, "
         "training, predict, plugin, error handling.\n"
-    ) 
+    )

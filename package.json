@@ -1,0 +1,13 @@
+{
+  "name": "brain-mapping",
+  "version": "0.1.0",
+  "description": "Advanced brain mapping toolkit with visualization and QC",
+  "main": "src/index.js",
+  "scripts": {
+    "lint": "flake8 src/ --ignore=E501",
+    "test": "pytest tests/",
+    "build": "python -m build"
+  },
+  "author": "hkevin01",
+  "license": "MIT"
+}

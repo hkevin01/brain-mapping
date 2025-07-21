@@ -17,6 +17,7 @@ import pytest
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from brain_mapping.core.bids_loader import BIDSDatasetLoader, BIDSValidator
+from src.brain_mapping.core.provenance import ProvenanceTracker
 
 
 @pytest.fixture
@@ -323,7 +324,16 @@ class TestBIDSIntegration:
             assert len(sessions) == 2
             assert "ses-01" in sessions
             assert "ses-02" in sessions
+    
+    def test_bids_loader_provenance(self):
+        tracker = ProvenanceTracker()
+        tracker.log_event(
+            "data_loaded",
+            {"source": "bids", "file": "test_bids_file.nii.gz"}
+        )
+        events = tracker.get_events()
+        assert any(e["event_type"] == "data_loaded" for e in events)
 
 
 if __name__ == "__main__":
-    pytest.main([__file__]) 
+    pytest.main([__file__])

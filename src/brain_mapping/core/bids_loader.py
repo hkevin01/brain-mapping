@@ -16,19 +16,15 @@ import json
 import pandas as pd
 import numpy as np
 
-try:
-    import nibabel as nib
-    NIBABEL_AVAILABLE = True
-except ImportError:
-    NIBABEL_AVAILABLE = False
-    warnings.warn("nibabel not available. BIDS loading disabled.")
+from .provenance import ProvenanceTracker
 
-try:
-    from bids import BIDSLayout
-    PY_BIDS_AVAILABLE = True
-except ImportError:
-    PY_BIDS_AVAILABLE = False
-    warnings.warn("pybids not available. Using basic BIDS validation.")
+
+# Initialize provenance tracker for BIDS loader
+provenance_tracker = ProvenanceTracker()
+
+# Example hook: log data load event
+# In actual data loading function, add:
+# provenance_tracker.log_event("data_loaded", {"source": "bids", "file": bids_file_path})
 
 
 class BIDSDatasetLoader:
@@ -55,6 +51,8 @@ class BIDSDatasetLoader:
         self.layout = None
         self.participants_df = None
         self.validation_errors = []
+        
+        provenance_tracker.log_event("init_bids_loader", {"bids_root": str(self.dataset_path)})
         
         if not self.dataset_path.exists():
             raise FileNotFoundError(f"BIDS dataset not found: {dataset_path}")
@@ -140,6 +138,8 @@ class BIDSDatasetLoader:
             print(f"✗ BIDS dataset validation failed with {len(self.validation_errors)} errors:")
             for error in self.validation_errors:
                 print(f"  - {error}")
+        
+        provenance_tracker.log_event("bids_validation", {"bids_root": str(self.dataset_path), "errors": self.validation_errors})
         
         return is_valid
     
@@ -476,4 +476,4 @@ class BIDSValidator:
             'is_valid': len(loader.validation_errors) == 0,
             'errors': loader.validation_errors,
             'dataset_info': loader.get_dataset_info()
-        } 
+        }

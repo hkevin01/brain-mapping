@@ -1,0 +1,126 @@
+{
+  "timestamp": "2025-07-21 01:17:18",
+  "execution_time": 0.9773061275482178,
+  "results": {
+    "phase1": {
+      "status": "PASS",
+      "tests": [
+        [
+          "Core Module Imports",
+          "PASS"
+        ],
+        [
+          "Data Loader Initialization",
+          "PASS"
+        ],
+        [
+          "Preprocessor Initialization",
+          "PASS"
+        ],
+        [
+          "Quality Control Initialization",
+          "PASS"
+        ],
+        [
+          "Glass Brain Projector",
+          "PASS"
+        ],
+        [
+          "Multi-Planar Reconstructor",
+          "PASS"
+        ],
+        [
+          "Interactive Brain Atlas",
+          "PASS"
+        ],
+        [
+          "Synthetic Data Creation",
+          "PASS"
+        ],
+        [
+          "Basic Data Processing",
+          "PASS"
+        ]
+      ],
+      "errors": []
+    },
+    "phase2": {
+      "status": "PASS",
+      "tests": [
+        [
+          "Plugin Architecture Base",
+          "PASS"
+        ],
+        [
+          "Gaussian Smoothing Plugin",
+          "PASS"
+        ],
+        [
+          "Quality Control Plugin",
+          "PASS"
+        ],
+        [
+          "Motion Correction Plugin",
+          "PASS"
+        ],
+        [
+          "GPU Detection",
+          "PASS"
+        ],
+        [
+          "Mixed Precision Support",
+          "PASS"
+        ],
+        [
+          "Preprocessing Pipeline",
+          "PASS"
+        ],
+        [
+          "Neural Data Packages",
+          "SKIP"
+        ]
+      ],
+      "errors": []
+    },
+    "phase3": {
+      "status": "PASS",
+      "tests": [
+        [
+          "BIDS Validator",
+          "PASS"
+        ],
+        [
+          "BIDS Loader Import",
+          "PASS"
+        ],
+        [
+          "Cloud Processor Import",
+          "PASS"
+        ],
+        [
+          "Cloud Collaboration Import",
+          "PASS"
+        ],
+        [
+          "ML Workflow Framework",
+          "SKIP"
+        ],
+        [
+          "Real-time Analysis",
+          "SKIP"
+        ],
+        [
+          "Multi-modal Integration",
+          "SKIP"
+        ]
+      ],
+      "errors": []
+    },
+    "overall": {
+      "status": "PASS",
+      "total_tests": 24,
+      "passed": 20,
+      "failed": 0
+    }
+  }
+}

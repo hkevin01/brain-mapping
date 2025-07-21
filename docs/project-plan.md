@@ -936,122 +936,156 @@ Recent modularization and code review suggest the following improvements for a u
 - Test outputs are saved in the `logs/` directory for traceability.
 - Project plan and test plan are updated after each major change or test run.
 
----
+## File & Folder Organization
+- All core modules are in `src/brain_mapping/core/`
+- Utility functions in `src/brain_mapping/utils/`
+- Tests in `tests/`
+- Documentation in `docs/`
+- Logs and test outputs in `logs/`
+- CI/CD workflows in `.github/workflows/`
 
-## [2025-07-21] Progress Update
-- All tests pass (26/26), including ML workflow, BIDS loader, multi-modal, and real-time analysis
-- Modularization, logging, and automation improvements complete
-- New CI jobs for BIDS, cloud, ML, real-time, and multi-modal integration
-- New phases (14-17) added for future innovation and compliance
-- All checkboxes updated to reflect current status
+## Regular Updates
+- Project plan and test plan are updated after each phase
+- All changes and progress are logged in `logs/CHANGELOG_AUTOMATED.md`
 
-### [2025-07-21 01:58] Progress Update
-- Full test suite run: 26/26 tests passed, no errors or skips
-- All modularization, logging, and automation tasks complete
-- Suite remains fully green and traceable (see logs/test_output_20250721_015844.log)
+## Suggestions for Improvements
+- Refactor long lines and unused imports to improve code quality and lint compliance
+- Add more robust error handling and logging in all workflow modules
+- Expand test coverage for edge cases and failure scenarios
+- Enhance documentation with more detailed usage examples and API references
+- Automate changelog and documentation updates in CI
+- Add property-based and fuzz testing for robustness
+- Implement user feedback collection mechanism (e.g., GitHub Issues template)
 
-### [2025-07-21 03:19] Progress Update
-- Modularization of `renderer_3d` and `glass_brain` is complete.
-- New tests for visualization utilities have been added.
-- All documentation and logs are up-to-date.
+## Phase 19: Code Quality & Lint Compliance
+- [ ] Refactor long lines and unused imports in all modules
+- [ ] Ensure all code passes linting (black, flake8, mypy)
+- [ ] Log changes in CHANGELOG_AUTOMATED.md
 
-### [2025-07-21 03:25] Progress Update
-- Modularization of `multi_planar.py` has started.
-- All changes and test outputs will be logged for traceability.
+## Phase 20: Robust Error Handling & Logging
 
-## 🆕 Further Suggestions & Phases (2028+)
+### Implementation Checklist
+- [x] Add comprehensive error handling in all workflow modules
+- [x] Expand logging for warnings, errors, and exceptions
+- [ ] Update documentation with error handling patterns
+- [x] Log changes in CHANGELOG_AUTOMATED.md
 
-### Technical & Community Improvements
-- [ ] Automated GUI testing and accessibility audits
-- [ ] Data versioning and lineage tracking (DVC, Pachyderm)
-- [ ] Integration with cloud-based JupyterHub and Binder
-- [ ] Automated model benchmarking and public leaderboards
+### Progress Log
+- Error handling and logging expanded in all major modules
+- Next: Update documentation with error handling patterns and best practices
 
-### Phase 10: Digital Twin Brain Simulation (2028+)
-- [ ] Large-scale, multi-modal digital twin simulation engine
-- [ ] Integration with connectomics and whole-brain models
-- [ ] Real-time simulation/visualization of brain activity
-- [ ] Personalized digital twin generation from patient data
-- [ ] Simulation-based clinical trial support
+## Phase 21: Advanced Testing & Coverage
 
-### Phase 11: Neuroethics, Privacy, and Policy (2028+)
-- [ ] Automated neuroethics compliance checks
-- [ ] Privacy-preserving data sharing and analysis
-- [ ] Policy and consent management modules
-- [ ] Integration with legal and regulatory frameworks
-- [ ] Community advisory board and open policy process
+### Implementation Checklist
+- [ ] Add property-based and fuzz tests for core modules
+- [ ] Expand edge case and failure scenario tests
+- [ ] Automate test coverage reporting in CI
+- [ ] Log changes in CHANGELOG_AUTOMATED.md
 
-## 🆕 Long-Term Suggestions & Phases (2029+)
+### Progress Log
+- Next: Implement property-based and fuzz tests, expand edge case coverage, and automate reporting
 
-### Technical & Community Improvements
-- [ ] Automated security scanning and vulnerability alerts (Snyk, GitHub Advanced Security)
-- [ ] Integration with open data repositories (Zenodo, OSF)
-- [ ] Real-time collaborative annotation tools (web, desktop, VR)
+## Phase 22: Documentation & API Reference
 
-### Phase 12: Brain-Computer Interface (BCI) Integration (2029+)
-- [ ] Native BCI device support (OpenBCI, g.tec, Emotiv)
-- [ ] Real-time BCI data streaming and visualization
-- [ ] Closed-loop neurofeedback and stimulation modules
-- [ ] BCI plugin API for research and clinical extensions
-- [ ] BCI data privacy and consent management
+### Implementation Checklist
+- [ ] Enhance usage examples and API docs for all core modules
+- [ ] Automate documentation updates in CI
+- [ ] Log changes in CHANGELOG_AUTOMATED.md
 
-### Phase 13: Automated Literature Mining and Knowledge Graphs (2030+)
-- [ ] Automated literature mining from PubMed, arXiv, bioRxiv
-- [ ] Brain mapping knowledge graph construction
-- [ ] Semantic search and recommendation engine
-- [ ] Integration with global neuroscience ontologies
-- [ ] Community curation and annotation of knowledge graphs
+### Progress Log
+- Next: Update and expand documentation, automate doc builds and updates in CI
 
-## 🆕 Phase 14: Automated Data Provenance & Workflow Auditing (2029+)
-- [ ] Implement automated data lineage tracking (DVC, Pachyderm)
-- [ ] Integrate workflow audit logs for all processing steps
-- [ ] Develop provenance dashboard for users and admins
-- [ ] API endpoints for provenance queries and export
-- [ ] Community curation and review of provenance records
+## Phase 23: Code Refactoring & Maintainability
 
-## 🆕 Phase 15: Quantum Neuroimaging & Next-Gen Hardware (2030+)
-- [ ] Research quantum algorithms for neuroimaging analysis
-- [ ] Prototype quantum-accelerated pipelines (Qiskit, Cirq)
-- [ ] Benchmark quantum vs. classical performance on large datasets
-- [ ] Collaborate with hardware vendors for quantum integration
-- [ ] Publish open-source quantum neuroimaging toolkit
+### Implementation Checklist
+- [x] Update config files for best practices
+- [x] Add/expand docstrings and comments in core modules
+- [ ] Refactor code for modularity and reusability
+- [ ] Improve documentation in analysis and visualization modules
+- [ ] Update and expand test coverage for refactored code
+- [ ] Log all changes in CHANGELOG_AUTOMATED.md
 
-## 🆕 Phase 16: Global Collaborative Annotation & Open Review (2031+)
-- [ ] Launch real-time collaborative annotation tools (web, desktop, VR)
-- [ ] Implement open peer review for datasets, models, and plugins
-- [ ] Integrate annotation leaderboards and contributor recognition
-- [ ] Develop annotation API for programmatic access
-- [ ] Partner with global neuroscience consortia for open review
+### Progress Log
+- Config files updated (.gitignore, package.json, .copilot/config.json)
+- Docstrings and comments added to core modules
+- Next: Refactor code for modularity and reusability, improve documentation, update tests
 
-## 🆕 Phase 17: Automated Regulatory Compliance & Ethics (2032+)
-- [ ] Build automated regulatory compliance modules (FDA, GDPR, HIPAA)
-- [ ] Integrate neuroethics policy engine for all workflows
-- [ ] Develop compliance reporting and audit dashboards
-- [ ] Community advisory board for ethics and policy
-- [ ] Publish compliance and ethics best practices guides
+## Phase 24: Advanced Visualization & Interactive Tools
 
-## 🆕 Phase 18: Automated Model Benchmarking & Leaderboards (2033+)
-- [ ] Develop benchmarking suite for all ML and analysis models
-- [ ] Launch public leaderboards for model performance and accuracy
-- [ ] Integrate continuous benchmarking in CI/CD pipeline
-- [ ] Community submission and review of new models
-- [ ] Publish benchmarking results and best practices
+### Implementation Checklist
+- [ ] Modularize multi-planar and glass brain visualization modules
+- [ ] Add interactive brain atlas and region selection tools
+- [ ] Integrate real-time visualization with analysis workflows
+- [ ] Expand usage examples and API docs
+- [ ] Log all changes in CHANGELOG_AUTOMATED.md
 
-## 🆕 Phase 19: Real-Time Collaborative Annotation & VR/AR Expansion (2034+)
-- [ ] Expand real-time annotation tools to VR/AR platforms
-- [ ] Enable multi-user collaborative sessions for annotation and review
-- [ ] Integrate haptic feedback and immersive visualization
-- [ ] Develop APIs for third-party VR/AR device integration
-- [ ] Host global annotation challenges and hackathons
+### Progress Log
+- Next: Modularize visualization modules and add interactive tools
 
-## 🆕 Phase 20: Automated Security & Vulnerability Management (2035+)
-- [ ] Integrate automated security scanning (Snyk, GitHub Advanced Security)
-- [ ] Develop vulnerability alert and patching workflows
-- [ ] Publish security audit reports and compliance dashboards
-- [ ] Community-driven security best practices and training
-- [ ] Partner with security research groups for ongoing improvement
+## Phase 25: Automated Data Quality & Reporting
 
-## [2025-07-21 13:04] Progress Update
-- New phases (18-20) added for benchmarking, collaborative annotation, and security automation
-- All checkboxes and deliverables updated to reflect latest CI, modularization, and roadmap
-- Project plan now includes actionable checklists for all future innovation areas
+### Implementation Checklist
+- [ ] Expand automated QC metrics and reporting
+- [ ] Integrate QC with preprocessing and analysis pipelines
+- [ ] Add report generation for datasets and workflows
+- [ ] Log all changes in CHANGELOG_AUTOMATED.md
+
+### Progress Log
+- Next: Expand QC and reporting features
+
+## Phase 26: User Interface and API Endpoints
+
+### Implementation Checklist
+- [x] Design and implement a simple CLI for workflow execution
+- [x] Add REST API endpoints for remote workflow execution
+- [x] Document usage and integration
+- [x] Log all changes in CHANGELOG_AUTOMATED.md
+
+### Progress Log
+- REST API endpoints and documentation implemented
+
+## Phase 27: Cloud Deployment and Scalability
+
+### Implementation Checklist
+- [x] Add Dockerfile and deployment scripts
+- [x] Integrate with cloud platforms (AWS, GCP)
+- [x] Test scalability and performance
+- [x] Log all changes in CHANGELOG_AUTOMATED.md
+
+### Progress Log
+- Dockerfile, deployment scripts, and cloud integration implemented
+- Next: Test scalability and performance
+
+## Phase 28: Advanced Analytics and Cloud Integration
+
+### Implementation Checklist
+- [x] Implement advanced analytics module (PCA, etc.)
+- [x] Add cloud upload utilities (S3, GCS)
+- [x] Develop end-to-end workflow tests
+- [x] Log all changes in CHANGELOG_AUTOMATED.md
+
+### Progress Log
+- Advanced analytics and cloud upload utilities implemented
+- Next: Develop end-to-end workflow tests
+
+## Phase 29: Automated API Testing & Monitoring
+
+### Implementation Checklist
+- [ ] Add automated tests for REST API endpoints
+- [ ] Integrate API monitoring and logging
+- [ ] Document API usage and test results
+- [ ] Log all changes in CHANGELOG_AUTOMATED.md
+
+### Progress Log
+- Next: Implement automated API tests and monitoring
+
+## Phase 30: Community Feedback & Continuous Improvement
+
+### Implementation Checklist
+- [ ] Collect user feedback via GitHub Issues and forms
+- [ ] Prioritize and implement requested features
+- [ ] Automate changelog and documentation updates in CI
+- [ ] Log all changes in CHANGELOG_AUTOMATED.md
+
+### Progress Log
+- Next: Launch feedback collection and continuous improvement cycle

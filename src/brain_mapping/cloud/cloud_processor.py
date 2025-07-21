@@ -453,6 +453,19 @@ class CloudProcessor:
             }
         except Exception as e:
             return {'error': f"Failed to get Azure storage usage: {e}"}
+    
+    def test_cloud_connection(self):
+        """Test connection to cloud provider."""
+        try:
+            if self.cloud_provider == 'aws':
+                self.client.list_buckets()
+            elif self.cloud_provider == 'google':
+                list(self.client.list_buckets())
+            print(f"Cloud connection to {self.cloud_provider} successful.")
+            return True
+        except Exception as e:
+            print(f"Cloud connection failed: {e}")
+            return False
 
 
 class CloudCollaboration:
@@ -551,4 +564,4 @@ class CloudCollaboration:
         List[Dict[str, Any]]
             List of active sessions
         """
-        return list(self.active_sessions.values()) 
+        return list(self.active_sessions.values())

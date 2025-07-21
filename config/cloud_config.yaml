@@ -1,0 +1,7 @@
+# Cloud Integration Configuration
+aws:
+  bucket: mybucket
+  region: us-east-1
+gcp:
+  bucket: mybucket
+  project: my-gcp-project

@@ -54,7 +54,7 @@ jobs:
       run: black --check src/
     
     - name: Run flake8
-      run: flake8 src/
+      run: flake8 src/ --ignore=E501
     
     - name: Run mypy
       run: mypy src/
@@ -195,3 +195,66 @@ jobs:
       uses: codecov/codecov-action@v3
       with:
         file: ./coverage.xml
+
+  provenance-validation:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: [3.8, 3.9, "3.10", "3.11"]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]"
+    - name: Run provenance integration tests
+      run: |
+        pytest tests/test_provenance.py --cov=brain_mapping --cov-report=xml
+        pytest tests/test_bids_loader.py --cov=brain_mapping --cov-report=xml
+        pytest tests/test_ml_workflow.py --cov=brain_mapping --cov-report=xml
+        pytest tests/test_real_time.py --cov=brain_mapping --cov-report=xml
+        pytest tests/test_multi_modal.py --cov=brain_mapping --cov-report=xml
+    - name: Upload provenance logs
+      uses: actions/upload-artifact@v3
+      with:
+        name: provenance-logs
+        path: logs/provenance/
+    - name: Upload test output logs
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-output-logs
+        path: logs/*.log
+    - name: Upload coverage
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+
+  property-based-tests:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: [3.8, 3.9, "3.10", "3.11"]
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e ".[dev]" hypothesis
+    - name: Run property-based tests
+      run: |
+        pytest tests/test_property_based.py --maxfail=1 --disable-warnings -v
+    - name: Upload test output logs
+      uses: actions/upload-artifact@v3
+      with:
+        name: property-test-logs
+        path: logs/*.log

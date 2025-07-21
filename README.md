@@ -131,5 +131,36 @@ See the [project plan Suggestions & Continuous Improvement section](docs/project
 
 ---
 
+## CI/CD Status & Badges
+
+| Job                    | Status |
+|------------------------|--------|
+| ![Test](https://github.com/hkevin01/brain-mapping/actions/workflows/ci.yml/badge.svg?branch=main) | Test |
+| ![Lint](https://github.com/hkevin01/brain-mapping/actions/workflows/ci.yml/badge.svg?branch=main&event=lint) | Lint |
+| ![Build](https://github.com/hkevin01/brain-mapping/actions/workflows/ci.yml/badge.svg?branch=main&event=build) | Build |
+| ![BIDS Validation](https://github.com/hkevin01/brain-mapping/actions/workflows/ci.yml/badge.svg?branch=main&event=bids-validation) | BIDS Validation |
+| ![Cloud Integration](https://github.com/hkevin01/brain-mapping/actions/workflows/ci.yml/badge.svg?branch=main&event=cloud-integration) | Cloud Integration |
+| ![ML Workflow](https://github.com/hkevin01/brain-mapping/actions/workflows/ci.yml/badge.svg?branch=main&event=ml-workflow) | ML Workflow |
+| ![Real-Time Analysis](https://github.com/hkevin01/brain-mapping/actions/workflows/ci.yml/badge.svg?branch=main&event=real-time-analysis) | Real-Time Analysis |
+| ![Multi-Modal Integration](https://github.com/hkevin01/brain-mapping/actions/workflows/ci.yml/badge.svg?branch=main&event=multi-modal-integration) | Multi-Modal Integration |
+| ![Provenance Validation](https://github.com/hkevin01/brain-mapping/actions/workflows/ci.yml/badge.svg?branch=main&event=provenance-validation) | Provenance Validation |
+
+## Provenance & Audit Logging
+
+The toolkit supports modular data provenance and workflow audit logging via the `ProvenanceTracker` class. All major workflow modules log key events to JSONL files in `logs/provenance/` for traceability.
+
+### Usage Example
+```python
+from src.brain_mapping.core.provenance import ProvenanceTracker
+tracker = ProvenanceTracker()
+tracker.log_event("data_loaded", {"source": "bids", "file": "sub-01_T1w.nii.gz"})
+tracker.log_event("preprocessing", {"step": "bias_correction", "params": {"method": "N4"}})
+```
+
+### Test Output Logging
+All test outputs are saved in the `logs/` folder for examination and traceability.
+
+---
+
 ## Citation & Contact
 If you use this toolkit, please cite the repository and reach out with feedback or collaboration ideas!

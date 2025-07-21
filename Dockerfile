@@ -1,3 +1,5 @@
+# Dockerfile for brain-mapping toolkit
+
 # Use official Python runtime as base image
 FROM python:3.11-slim
 
@@ -45,4 +47,4 @@ RUN useradd -m -u 1000 brainmapper
 USER brainmapper
 
 # Default command
-CMD ["brain-mapper", "--help"]
+CMD ["python", "src/brain_mapping/cli/main_cli.py"]
