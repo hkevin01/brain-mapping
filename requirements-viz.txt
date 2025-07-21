@@ -1,0 +1,19 @@
+# Advanced Visualization Dependencies
+# Install with: pip install -r requirements-viz.txt
+
+# 3D Visualization
+vtk>=9.0.0
+mayavi>=4.7.0
+
+# GUI Framework
+PyQt6>=6.2.0
+# Alternative: PySide6>=6.2.0
+
+# Interactive visualization
+ipywidgets>=7.6.0
+jupyter>=1.0.0
+
+# Additional visualization libraries
+k3d>=2.9.0              # 3D plotting for Jupyter
+plotly>=5.0.0           # Interactive plots
+bokeh>=2.4.0            # Interactive web plots 

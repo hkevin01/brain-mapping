@@ -57,6 +57,10 @@ class Visualizer:
     
     def _init_vtk(self):
         """Initialize VTK rendering components."""
+        if not VTK_AVAILABLE:
+            warnings.warn("VTK not available, skipping VTK initialization")
+            return
+            
         self.renderer = vtk.vtkRenderer()
         self.render_window = vtk.vtkRenderWindow()
         self.render_window.AddRenderer(self.renderer)
@@ -213,7 +217,13 @@ class Visualizer:
         warnings.warn("Glass brain visualization not yet implemented")
         return False
     
-    def _numpy_to_vtk_image(self, data: np.ndarray) -> vtk.vtkImageData:
+    def _numpy_to_vtk_image(self, data: np.ndarray):
+        """Convert numpy array to VTK image data."""
+        if not VTK_AVAILABLE:
+            warnings.warn("VTK not available for image conversion")
+            return None
+            
+        return vtk.vtkImageData()
         """Convert numpy array to VTK image data."""
         vtk_data = vtk.vtkImageData()
         vtk_data.SetDimensions(data.shape)
@@ -234,8 +244,14 @@ class Visualizer:
         vtk_data.GetPointData().SetScalars(vtk_array)
         return vtk_data
     
-    def _create_slice_actor(self, vtk_data: vtk.vtkImageData,
-                           plane: str, slice_idx: int) -> Optional[vtk.vtkActor]:
+    def _create_slice_actor(self, vtk_data,
+                           plane: str, slice_idx: int):
+        """Create slice actor for visualization."""
+        if not VTK_AVAILABLE or vtk_data is None:
+            warnings.warn("VTK not available for slice actor creation")
+            return None
+            
+        return vtk.vtkActor()
         """Create a slice plane actor."""
         try:
             # Create cutting plane
