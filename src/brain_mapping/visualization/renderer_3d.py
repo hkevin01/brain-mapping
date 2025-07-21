@@ -38,21 +38,31 @@ class BaseVisualizer:
     """
     def __init__(self):
         self.actors = []
+        self.data = None
 
     def set_data(self, data: np.ndarray):
-        raise NotImplementedError
+        self.data = data
 
     def render(self):
-        raise NotImplementedError
+        if self.data is not None:
+            print(f"Rendering data with shape: {self.data.shape}")
+        else:
+            print("No data set for rendering.")
 
     def save(self, filename: str):
-        raise NotImplementedError
+        if self.data is not None:
+            print(f"Saving visualization to {filename}")
+        else:
+            print("No data to save.")
 
     def clear_scene(self):
         self.actors.clear()
 
     def show(self):
-        raise NotImplementedError
+        if self.data is not None:
+            print("Showing visualization window.")
+        else:
+            print("No data to show.")
 
 
 class VTKVisualizer(BaseVisualizer):

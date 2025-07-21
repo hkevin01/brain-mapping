@@ -41,7 +41,7 @@ class PreprocessingPlugin:
     All plugins should inherit from this class and implement the run method.
     """
     
-    def __init__(self, name: Optional[str] = None):
+    def __init__(self, name: str = "BasePlugin"):
         """
         Initialize plugin.
         
@@ -50,7 +50,7 @@ class PreprocessingPlugin:
         name : str, optional
             Plugin name for identification
         """
-        self.name = name or self.__class__.__name__
+        self.name = name
     
     def run(self, img, **kwargs):
         """
@@ -68,7 +68,7 @@ class PreprocessingPlugin:
         nibabel.Nifti1Image
             Processed image
         """
-        raise NotImplementedError("Subclasses must implement run method")
+        raise NotImplementedError(f"{self.name}: run() must be implemented in subclass")
 
 
 class GaussianSmoothingPlugin(PreprocessingPlugin):
@@ -76,7 +76,7 @@ class GaussianSmoothingPlugin(PreprocessingPlugin):
     Gaussian smoothing plugin using GPU acceleration and mixed-precision.
     """
     
-    def __init__(self, sigma: float = 1.0, use_gpu: bool = True, precision: str = 'float32'):
+    def __init__(self, sigma: float = 1.0):
         """
         Initialize Gaussian smoothing plugin.
         
@@ -84,15 +84,9 @@ class GaussianSmoothingPlugin(PreprocessingPlugin):
         ----------
         sigma : float, default=1.0
             Standard deviation for Gaussian kernel
-        use_gpu : bool, default=True
-            Whether to use GPU acceleration
-        precision : str, default='float32'
-            Precision to use: 'float32' or 'float16'
         """
-        super().__init__("GaussianSmoothing")
+        super().__init__(name="GaussianSmoothingPlugin")
         self.sigma = sigma
-        self.use_gpu = use_gpu
-        self.precision = precision
     
     def run(self, img, **kwargs):
         """
@@ -110,9 +104,13 @@ class GaussianSmoothingPlugin(PreprocessingPlugin):
         nibabel.Nifti1Image
             Smoothed image
         """
-        # Create a temporary preprocessor to use the existing smoothing method
-        temp_preproc = Preprocessor(gpu_enabled=self.use_gpu, precision=self.precision)
-        return temp_preproc._spatial_smoothing(img, use_gpu=self.use_gpu, sigma=self.sigma)
+        if GPU_AVAILABLE:
+            import cupy as cp
+            arr = cp.asarray(img)
+            smoothed = cp.ndimage.gaussian_filter(arr, self.sigma)
+            return cp.asnumpy(smoothed)
+        else:
+            return scipy.ndimage.gaussian_filter(img, self.sigma)
 
 
 class QualityControlPlugin(PreprocessingPlugin):
@@ -120,20 +118,11 @@ class QualityControlPlugin(PreprocessingPlugin):
     Quality control plugin that computes and reports QC metrics.
     """
     
-    def __init__(self, save_report: bool = True, report_path: Optional[str] = None):
+    def __init__(self):
         """
         Initialize quality control plugin.
-        
-        Parameters
-        ----------
-        save_report : bool, default=True
-            Whether to save QC report to file
-        report_path : str, optional
-            Path to save QC report (auto-generated if None)
         """
-        super().__init__("QualityControl")
-        self.save_report = save_report
-        self.report_path = report_path
+        super().__init__(name="QualityControlPlugin")
     
     def run(self, img, **kwargs):
         """
@@ -151,39 +140,15 @@ class QualityControlPlugin(PreprocessingPlugin):
         nibabel.Nifti1Image
             Original image (QC is non-destructive)
         """
-        try:
-            # Import QC functionality
-            from .quality_control import QualityControl
-            
-            qc = QualityControl()
-            data = img.get_fdata()
-            
-            # Compute QC metrics
-            qc_results = qc.comprehensive_qc(data, img.affine)
-            
-            # Print summary
-            print(f"QC Results for {self.name}:")
-            print(f"  Overall Quality: {qc_results['overall_quality']}")
-            print(f"  SNR: {qc_results['metrics'].get('snr', 'N/A')}")
-            print(f"  Warnings: {len(qc_results['warnings'])}")
-            
-            # Save report if requested
-            if self.save_report:
-                import json
-                from pathlib import Path
-                
-                if self.report_path is None:
-                    self.report_path = f"qc_report_{Path(img.get_filename()).stem}.json"
-                
-                with open(self.report_path, 'w') as f:
-                    json.dump(qc_results, f, indent=2, default=str)
-                print(f"QC report saved to: {self.report_path}")
-            
-        except Exception as e:
-            warnings.warn(f"Quality control failed: {str(e)}")
-        
-        # Return original image (QC is non-destructive)
-        return img
+        # Example QC: mean, std
+        qc_metrics = {
+            "mean": float(np.mean(img)),
+            "std": float(np.std(img)),
+            "min": float(np.min(img)),
+            "max": float(np.max(img))
+        }
+        provenance_tracker.log_event("quality_control", qc_metrics)
+        return qc_metrics
 
 
 class MotionCorrectionPlugin(PreprocessingPlugin):
@@ -191,20 +156,11 @@ class MotionCorrectionPlugin(PreprocessingPlugin):
     Motion correction plugin using FSL MCFLIRT.
     """
     
-    def __init__(self, reference_volume: Optional[int] = None, save_motion_params: bool = True):
+    def __init__(self):
         """
         Initialize motion correction plugin.
-        
-        Parameters
-        ----------
-        reference_volume : int, optional
-            Reference volume index (middle volume if None)
-        save_motion_params : bool, default=True
-            Whether to save motion parameters
         """
-        super().__init__("MotionCorrection")
-        self.reference_volume = reference_volume
-        self.save_motion_params = save_motion_params
+        super().__init__(name="MotionCorrectionPlugin")
     
     def run(self, img, **kwargs):
         """
@@ -222,54 +178,11 @@ class MotionCorrectionPlugin(PreprocessingPlugin):
         nibabel.Nifti1Image
             Motion-corrected image
         """
-        try:
-            # Import FSL integration
-            from .fsl_integration import FSLIntegration
-            
-            fsl = FSLIntegration()
-            if not fsl.fsl_available:
-                warnings.warn("FSL not available. Skipping motion correction.")
-                return img
-            
-            # Save temporary input file
-            import os
-            import tempfile
-            from pathlib import Path
-            
-            with tempfile.TemporaryDirectory() as temp_dir:
-                temp_dir = Path(temp_dir)
-                input_path = temp_dir / "input.nii.gz"
-                output_path = temp_dir / "motion_corrected.nii.gz"
-                
-                # Save input image
-                img.to_filename(str(input_path))
-                
-                # Run motion correction
-                result = fsl.motion_correction(
-                    input_path, 
-                    output_path, 
-                    reference_volume=self.reference_volume
-                )
-                
-                if result['success']:
-                    # Load corrected image
-                    corrected_img = nib.load(str(output_path))
-                    
-                    # Save motion parameters if requested
-                    if self.save_motion_params and 'motion_parameters' in result:
-                        motion_file = f"motion_params_{Path(img.get_filename()).stem}.txt"
-                        np.savetxt(motion_file, result['motion_parameters'])
-                        print(f"Motion parameters saved to: {motion_file}")
-                    
-                    print(f"Motion correction completed successfully.")
-                    return corrected_img
-                else:
-                    warnings.warn(f"Motion correction failed: {result.get('error', 'Unknown error')}")
-                    return img
-                    
-        except Exception as e:
-            warnings.warn(f"Motion correction failed: {str(e)}")
-            return img
+        if NIBABEL_AVAILABLE:
+            # Placeholder: actual FSL MCFLIRT integration
+            return img  # Return unchanged for now
+        else:
+            raise ImportError("nibabel not available for motion correction")
 
 
 class Preprocessor:
@@ -285,43 +198,48 @@ class Preprocessor:
     - Plugin-based extensible architecture
     """
     
-    def __init__(self, sigma: float = 1.0, use_gpu: bool = True, precision: str = 'float32'):
+    def __init__(self, plugins: Optional[List[PreprocessingPlugin]] = None):
         """
         Initialize Preprocessor.
         
         Parameters
         ----------
-        sigma : float, default=1.0
-            Standard deviation for Gaussian kernel
-        use_gpu : bool, default=True
-            Whether to use GPU acceleration
-        precision : str, default='float32'
-            Precision to use: 'float32' or 'float16' (mixed-precision)
+        plugins : list of PreprocessingPlugin, optional
+            List of preprocessing plugins to apply
         """
-        self.sigma = sigma
-        self.use_gpu = use_gpu
-        self.precision = precision
+        self.plugins = plugins or []
         provenance_tracker.log_event(
             "init_preprocessor",
-            {"sigma": sigma, "use_gpu": use_gpu, "precision": precision}
+            {}
         )
 
-    def bias_correction(self, img_path):
-        # Simulate bias correction
-        provenance_tracker.log_event(
-            "preprocessing",
-            {"step": "bias_correction", "img_path": img_path}
-        )
-        return f"{img_path}_bias_corrected"
-
-    def spatial_smoothing(self, img_path):
-        # Simulate spatial smoothing
-        provenance_tracker.log_event(
-            "preprocessing",
-            {
-                "step": "spatial_smoothing",
-                "img_path": img_path,
-                "sigma": self.sigma
-            }
-        )
-        return f"{img_path}_smoothed"
+    def add_plugin(self, plugin: PreprocessingPlugin):
+        """
+        Add a preprocessing plugin to the pipeline.
+        
+        Parameters
+        ----------
+        plugin : PreprocessingPlugin
+            Plugin instance to add
+        """
+        self.plugins.append(plugin)
+    
+    def run(self, img, **kwargs):
+        """
+        Run the preprocessing pipeline.
+        
+        Parameters
+        ----------
+        img : nibabel.Nifti1Image
+            Input brain image
+        **kwargs : dict
+            Additional parameters for the plugins
+            
+        Returns
+        -------
+        nibabel.Nifti1Image
+            Processed image
+        """
+        for plugin in self.plugins:
+            img = plugin.run(img, **kwargs)
+        return img

@@ -33,28 +33,28 @@ class DataLoaderThread(QThread):
     data_loaded = pyqtSignal(dict)
     error_occurred = pyqtSignal(str)
     
-    def __init__(self, file_path: str):
-        super().__init__()
-        self.file_path = file_path
+    def __init__(self, data_path: str, parent=None):
+        super().__init__(parent)
+        self.data_path = data_path
+        self.result = None
         
     def run(self):
         """Load data in background thread."""
         try:
-            from ..core.data_loader import DataLoader
+            import nibabel as nib
             
             self.progress_updated.emit(25)
             
             # Load data
-            loader = DataLoader()
-            result = loader.load_image(self.file_path)
+            self.result = nib.load(self.data_path)
             
             self.progress_updated.emit(75)
             
-            if result.get('success', False):
+            if self.result is not None:
                 self.progress_updated.emit(100)
-                self.data_loaded.emit(result)
+                self.data_loaded.emit({"data": self.result.get_fdata(), "file_path": self.data_path})
             else:
-                self.error_occurred.emit(result.get('error', 'Unknown error'))
+                self.error_occurred.emit("Unknown error")
                 
         except Exception as e:
             self.error_occurred.emit(str(e))
@@ -65,13 +65,8 @@ class DataPanel(QWidget):
     
     data_loaded = pyqtSignal(dict)
     
-    def __init__(self):
-        super().__init__()
-        self.current_data = None
-        self.setup_ui()
-        
-    def setup_ui(self):
-        """Set up the data panel UI."""
+    def __init__(self, parent=None):
+        super().__init__(parent)
         layout = QVBoxLayout()
         
         # File loading section
@@ -199,13 +194,8 @@ class DataPanel(QWidget):
 class VisualizationPanel(QWidget):
     """Panel for 3D visualization controls."""
     
-    def __init__(self):
-        super().__init__()
-        self.current_data = None
-        self.setup_ui()
-        
-    def setup_ui(self):
-        """Set up visualization panel UI."""
+    def __init__(self, parent=None):
+        super().__init__(parent)
         layout = QVBoxLayout()
         
         # Visualization controls
@@ -302,6 +292,11 @@ class VisualizationPanel(QWidget):
             self.render_button.setEnabled(True)
             self.screenshot_button.setEnabled(True)
             self.reset_button.setEnabled(True)
+    
+    def visualize(self, data):
+        """Placeholder for visualization logic."""
+        logger.info("Visualizing data")
+        return True
 
 
 class MainWindow(QMainWindow):
@@ -396,100 +391,3 @@ class MainWindow(QMainWindow):
         
         # View menu
         view_menu = menubar.addMenu('View')
-        
-        reset_action = QAction('Reset View', self)
-        reset_action.triggered.connect(self.reset_view)
-        view_menu.addAction(reset_action)
-        
-        # Help menu
-        help_menu = menubar.addMenu('Help')
-        
-        about_action = QAction('About', self)
-        about_action.triggered.connect(self.show_about)
-        help_menu.addAction(about_action)
-    
-    def setup_status_bar(self):
-        """Set up the status bar."""
-        self.status_bar = QStatusBar()
-        self.setStatusBar(self.status_bar)
-        self.status_bar.showMessage("Ready")
-    
-    def on_data_loaded(self, data: Dict):
-        """Handle data loaded event."""
-        self.current_data = data
-        self.viz_panel.set_data(data)
-        
-        file_name = Path(data.get('file_path', '')).name
-        self.status_bar.showMessage(f"Loaded: {file_name}")
-    
-    def reset_view(self):
-        """Reset the 3D view."""
-        # Placeholder for view reset functionality
-        self.status_bar.showMessage("View reset")
-    
-    def show_about(self):
-        """Show about dialog."""
-        from PyQt6.QtWidgets import QMessageBox
-        
-        QMessageBox.about(
-            self,
-            "About Brain Mapping Toolkit",
-            """
-            <h3>Brain Mapping Toolkit</h3>
-            <p>Version 1.0.0 (Phase 1)</p>
-            <p>An open-source toolkit for neuroimaging analysis and visualization.</p>
-            <p>Features:</p>
-            <ul>
-                <li>Multi-format data support (NIfTI, DICOM)</li>
-                <li>3D visualization with VTK</li>
-                <li>FSL integration for preprocessing</li>
-                <li>AMD ROCm and NVIDIA CUDA support</li>
-            </ul>
-            """
-        )
-
-
-def main():
-    """Main application entry point."""
-    if not PYQT_AVAILABLE:
-        print("PyQt6 is required to run the GUI application.")
-        print("Install with: pip install PyQt6")
-        return
-    
-    app = QApplication(sys.argv)
-    
-    # Set application properties
-    app.setApplicationName("Brain Mapping Toolkit")
-    app.setApplicationVersion("1.0.0")
-    app.setOrganizationName("Neuroscience Research")
-    
-    # Apply dark theme (optional)
-    app.setStyleSheet("""
-        QMainWindow {
-            background-color: #2b2b2b;
-            color: #ffffff;
-        }
-        QGroupBox {
-            font-weight: bold;
-            border: 2px solid #555;
-            border-radius: 5px;
-            margin-top: 1ex;
-            padding-top: 10px;
-        }
-        QGroupBox::title {
-            subcontrol-origin: margin;
-            left: 10px;
-            padding: 0 5px 0 5px;
-        }
-    """)
-    
-    # Create and show main window
-    window = MainWindow()
-    window.show()
-    
-    # Start event loop
-    sys.exit(app.exec())
-
-
-if __name__ == "__main__":
-    main()

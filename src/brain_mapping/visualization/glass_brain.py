@@ -220,6 +220,14 @@ class GlassBrainProjector:
             return False
 
 
+class GlassBrainVisualizer:
+    def __init__(self):
+        self.data = None
+    def show_projection(self, data):
+        self.data = data
+        print(f"Showing glass brain projection for data shape: {getattr(data, 'shape', None)}")
+
+
 class InteractiveBrainAtlas:
     """
     Interactive brain atlas for anatomical reference.

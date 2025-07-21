@@ -140,37 +140,21 @@ class MLWorkflowManager:
         """
         logger.info("Running automated analysis")
         self._validate_data(data)
-        if (
-            self.model_type == 'sklearn' and SKLEARN_AVAILABLE and self.model is not None
-        ):
+        if self.model_type == 'sklearn' and SKLEARN_AVAILABLE:
+            from sklearn.ensemble import RandomForestClassifier
+            clf = RandomForestClassifier()
             try:
-                # Dummy labels for demo
-                self.model.fit(
-                    data,
-                    np.zeros(data.shape[0])
-                )
-                preds = self.model.predict(data)
-                return {
-                    "status": "success",
-                    "predictions": preds
-                }
+                clf.fit(data, np.zeros(data.shape[0]))
+                return {"status": "success", "result": clf}
             except Exception as e:
                 logger.error(f"Automated analysis failed: {e}")
-                return {
-                    "status": "error",
-                    "error": str(e)
-                }
-        elif (
-            self.model_type == 'torch' and TORCH_AVAILABLE and self.model is not None
-        ):
-            logger.warning("Torch automated analysis not implemented.")
+                return {"status": "error", "error": str(e)}
+        elif self.model_type == 'torch' and TORCH_AVAILABLE:
+            # Implement torch-based analysis here
             return {"status": "not_implemented", "result": None}
         else:
             logger.error("No valid model or model_type for automated analysis.")
-            return {
-                "status": "error",
-                "error": "No valid model or model_type."
-            }
+            return {"status": "error", "error": "No valid model or model_type."}
 
     def custom_training(
         self, training_data: np.ndarray, labels: np.ndarray
@@ -267,31 +251,18 @@ class MLWorkflowManager:
         """
         logger.info("Running model interpretation")
         self._validate_data(data)
-        if (
-            self.model_type == 'sklearn' and SKLEARN_AVAILABLE and model is not None
-        ):
+        if self.model_type == 'sklearn' and SKLEARN_AVAILABLE:
             try:
-                if hasattr(model, 'coef_'):
-                    return {"coefficients": model.coef_}
-                else:
-                    return {"status": "no_coefficients"}
+                import shap
+                explainer = shap.Explainer(model, data)
+                shap_values = explainer.shap_values(data)
+                return {"status": "success", "shap_values": shap_values}
             except Exception as e:
                 logger.error(f"Model interpretation failed: {e}")
-                return {
-                    "status": "error",
-                    "error": str(e)
-                }
-        elif self.model_type == 'torch' and TORCH_AVAILABLE:
-            logger.warning("Torch model interpretation not implemented.")
-            return {"status": "not_implemented"}
+                return {"status": "error", "error": str(e)}
         else:
-            logger.error(
-                "No valid model or model_type for interpretation."
-            )
-            return {
-                "status": "error",
-                "error": "No valid model or model_type."
-            }
+            logger.error("No valid model or model_type for interpretation.")
+            return {"status": "error", "error": "No valid model or model_type."}
 
     def as_plugin(self) -> Callable:
         """
@@ -307,3 +278,27 @@ class MLWorkflowManager:
             return self.plugins.run_plugins(img, **kwargs)
 
         return plugin_run
+
+def run_ml_pipeline(data, labels=None):
+    """Run a basic ML pipeline (example: fit RandomForest if labels provided)."""
+    from sklearn.ensemble import RandomForestClassifier
+    if labels is not None:
+        clf = RandomForestClassifier()
+        clf.fit(data, labels)
+        return clf
+    else:
+        return None
+
+def extract_features(data):
+    """Extract basic features (mean, std) from data."""
+    import numpy as np
+    return {'mean': np.mean(data), 'std': np.std(data)}
+
+def interpret_model(model, data):
+    """Interpret model using SHAP (if available)."""
+    try:
+        import shap
+        explainer = shap.Explainer(model, data)
+        return explainer.shap_values(data)
+    except ImportError:
+        return None

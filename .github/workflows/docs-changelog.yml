@@ -1,0 +1,39 @@
+name: Docs and Changelog Automation
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  docs-changelog:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+          pip install hypothesis pytest requests
+      - name: Run tests
+        run: pytest --junitxml=logs/test-results.xml --tb=short
+      - name: Generate coverage report
+        run: pytest --cov=src --cov-report=xml
+      - name: Update documentation
+        run: |
+          cp docs/API_TESTING.md docs/USAGE.md docs/project-plan.md docs/test-plan.md docs/advanced_analytics.md docs/cloud_deployment.md docs/CONTRIBUTING.md docs/
+      - name: Update changelog
+        run: |
+          echo "$(date): Automated docs and changelog update." >> logs/CHANGELOG_AUTOMATED.md
+      - name: Upload logs
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-logs
+          path: logs/

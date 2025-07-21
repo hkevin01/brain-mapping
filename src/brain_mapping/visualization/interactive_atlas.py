@@ -493,6 +493,16 @@ class InteractiveBrainAtlas:
             return []
 
 
+class InteractiveAtlas:
+    def __init__(self):
+        self.selected_region = None
+    def select_region(self, region_id):
+        self.selected_region = region_id
+        print(f"Selected region: {region_id}")
+    def visualize_selected(self):
+        print(f"Visualizing selected region: {self.selected_region}")
+
+
 # Convenience functions for quick atlas usage
 def quick_atlas_overlay(background_image: Union[str, Path, np.ndarray, nib.Nifti1Image],
                        atlas_name: str = 'aal',

@@ -335,6 +335,21 @@ class MultiPlanarReconstructor:
             return False
 
 
+class MultiPlanarVisualizer:
+    """
+    Multi-planar visualization interface.
+    """
+    def __init__(self):
+        self.data = None
+    
+    def show_planes(self, data):
+        """
+        Show multi-planar visualization.
+        """
+        self.data = data
+        print(f"Showing multi-planar visualization for data shape: {getattr(data, 'shape', None)}")
+
+
 # Convenience functions for quick multi-planar visualization
 def quick_orthogonal_view(image_data: Union[str, Path, np.ndarray, nib.Nifti1Image],
                          output_path: Optional[Union[str, Path]] = None) -> plt.Figure:

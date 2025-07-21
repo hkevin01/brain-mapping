@@ -92,13 +92,68 @@ class StatisticalAnalyzer:
             return pvalues
         else:
             raise ValueError(f"Unknown correction method: {method}")
+    
+    def mean(self, data: np.ndarray) -> float:
+        """
+        Calculate the mean of the data.
+        
+        Parameters
+        ----------
+        data : numpy.ndarray
+            Input data
+            
+        Returns
+        -------
+        float
+            Mean of the data
+        """
+        return float(np.mean(data))
+    
+    def std(self, data: np.ndarray) -> float:
+        """
+        Calculate the standard deviation of the data.
+        
+        Parameters
+        ----------
+        data : numpy.ndarray
+            Input data
+            
+        Returns
+        -------
+        float
+            Standard deviation of the data
+        """
+        return float(np.std(data))
+    
+    def ttest(self, data1: np.ndarray, data2: np.ndarray) -> Dict[str, Any]:
+        """
+        Perform t-test between two data samples.
+        
+        Parameters
+        ----------
+        data1 : numpy.ndarray
+            First data sample
+        data2 : numpy.ndarray
+            Second data sample
+            
+        Returns
+        -------
+        dict
+            t-statistic and p-value
+        """
+        if SCIPY_AVAILABLE:
+            t, p = stats.ttest_ind(data1, data2)
+            return {"t": float(t), "p": float(p)}
+        else:
+            raise ImportError("SciPy not available for t-test")
 
 
 class ConnectivityAnalyzer:
     """Functional and structural connectivity analysis."""
     
     def __init__(self):
-        pass
+        self.correlation_matrix = None
+        self.connectivity_graph = None
     
     def compute_correlation_matrix(self, time_series: np.ndarray) -> np.ndarray:
         """
@@ -115,3 +170,20 @@ class ConnectivityAnalyzer:
             Correlation matrix
         """
         return np.corrcoef(time_series)
+    
+    def compute_connectivity(self, data: np.ndarray) -> np.ndarray:
+        """
+        Compute connectivity matrix from data.
+        
+        Parameters
+        ----------
+        data : numpy.ndarray
+            Input data (regions x time)
+            
+        Returns
+        -------
+        numpy.ndarray
+            Connectivity matrix
+        """
+        # Example: correlation matrix
+        return np.corrcoef(data)
