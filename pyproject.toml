@@ -7,16 +7,21 @@ name = "brain-mapping-toolkit"
 dynamic = ["version"]
 description = "GPU-accelerated toolkit for brain imaging analysis and visualization"
 readme = "README.md"
-license = {text = "MIT"}
+license = { text = "MIT" }
 authors = [
-    {name = "Brain Mapping Toolkit Team", email = "team@brain-mapping-toolkit.org"}
+    { name = "Brain Mapping Toolkit Team", email = "team@brain-mapping-toolkit.org" },
 ]
 maintainers = [
-    {name = "Brain Mapping Toolkit Team", email = "team@brain-mapping-toolkit.org"}
+    { name = "Brain Mapping Toolkit Team", email = "team@brain-mapping-toolkit.org" },
 ]
 keywords = [
-    "neuroscience", "neuroimaging", "fmri", "brain mapping", 
-    "visualization", "machine learning", "gpu acceleration"
+    "neuroscience",
+    "neuroimaging",
+    "fmri",
+    "brain mapping",
+    "visualization",
+    "machine learning",
+    "gpu acceleration",
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -43,27 +48,11 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-gpu = [
-    "cupy-cuda11x>=10.0.0",
-    "numba>=0.56.0",
-]
-deep-learning = [
-    "torch>=1.10.0",
-    "torchvision>=0.11.0",
-]
-visualization = [
-    "vtk>=9.0.0",
-    "mayavi>=4.7.0",
-    "plotly>=5.0.0",
-]
-gui = [
-    "PyQt6>=6.2.0",
-]
-medical = [
-    "pydicom>=2.3.0",
-    "SimpleITK>=2.1.0",
-    "nipype>=1.8.0",
-]
+gpu = ["cupy-cuda11x>=10.0.0", "numba>=0.56.0"]
+deep-learning = ["torch>=1.10.0", "torchvision>=0.11.0"]
+visualization = ["vtk>=9.0.0", "mayavi>=4.7.0", "plotly>=5.0.0"]
+gui = ["PyQt6>=6.2.0"]
+medical = ["pydicom>=2.3.0", "SimpleITK>=2.1.0", "nipype>=1.8.0"]
 cloud = [
     "boto3>=1.20.0",
     "google-cloud-storage>=2.0.0",
@@ -95,7 +84,7 @@ brain-mapper = "brain_mapping.cli:main"
 brain-gui = "brain_mapping.gui:main"
 
 [tool.setuptools]
-package-dir = {"" = "src"}
+package-dir = { "" = "src" }
 
 [tool.setuptools.packages.find]
 where = ["src"]
@@ -173,19 +162,11 @@ addopts = [
     "--cov-report=xml",
 ]
 testpaths = ["tests"]
-filterwarnings = [
-    "error",
-    "ignore::UserWarning",
-    "ignore::DeprecationWarning",
-]
+filterwarnings = ["error", "ignore::UserWarning", "ignore::DeprecationWarning"]
 
 [tool.coverage.run]
 source = ["brain_mapping"]
-omit = [
-    "*/tests/*",
-    "*/test_*",
-    "setup.py",
-]
+omit = ["*/tests/*", "*/test_*", "setup.py"]
 
 [tool.coverage.report]
 exclude_lines = [
@@ -196,7 +177,7 @@ exclude_lines = [
     "raise AssertionError",
     "raise NotImplementedError",
     "if 0:",
-    "if __name__ == .__main__.:",
-    "class .*\bProtocol\):",
-    "@(abc\.)?abstractmethod",
+    "if __name__ == '__main__':",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
 ]
