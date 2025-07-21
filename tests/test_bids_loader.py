@@ -5,78 +5,71 @@ Test suite for BIDS Dataset Loader
 Comprehensive tests for BIDS dataset validation, loading, and metadata management.
 """
 
-import pytest
-import tempfile
 import json
-import pandas as pd
-from pathlib import Path
-import numpy as np
-from unittest.mock import patch, MagicMock
-
-# Add src to path for imports
 import sys
+import tempfile
+from pathlib import Path
+from unittest.mock import patch
+
+import pandas as pd
+import pytest
+
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from brain_mapping.core.bids_loader import BIDSDatasetLoader, BIDSValidator
 
 
+@pytest.fixture
+def temp_bids_dataset():
+    """Create a temporary BIDS-compliant dataset for testing."""
+    with tempfile.TemporaryDirectory() as temp_dir:
+        temp_path = Path(temp_dir)
+        # Create dataset_description.json
+        desc = {
+            "Name": "Test BIDS Dataset",
+            "BIDSVersion": "1.4.0",
+            "Authors": ["Test Author"],
+            "HowToAcknowledge": "Cite this dataset"
+        }
+        with open(temp_path / "dataset_description.json", "w") as f:
+            json.dump(desc, f)
+        # Create participants.tsv
+        participants_data = {
+            "participant_id": ["sub-01", "sub-02"],
+            "age": [25, 30],
+            "sex": ["M", "F"]
+        }
+        participants_df = pd.DataFrame(participants_data)
+        participants_df.to_csv(
+            temp_path / "participants.tsv", sep="\t", index=False
+        )
+        # Create subject directories
+        for sub_id in ["sub-01", "sub-02"]:
+            sub_dir = temp_path / sub_id
+            sub_dir.mkdir()
+            # Create session directory
+            ses_dir = sub_dir / "ses-01"
+            ses_dir.mkdir()
+            # Create modality directories
+            for modality in ["anat", "func"]:
+                mod_dir = ses_dir / modality
+                mod_dir.mkdir()
+                # Create dummy NIfTI file
+                nii_file = mod_dir / f"{sub_id}_ses-01_T1w.nii.gz"
+                nii_file.touch()
+                # Create JSON metadata file
+                json_file = mod_dir / f"{sub_id}_ses-01_T1w.json"
+                metadata = {
+                    "RepetitionTime": 2.0,
+                    "EchoTime": 0.03,
+                    "FlipAngle": 90
+                }
+                with open(json_file, "w") as f:
+                    json.dump(metadata, f)
+        yield temp_path
+
 class TestBIDSDatasetLoader:
     """Test cases for BIDSDatasetLoader class."""
-    
-    @pytest.fixture
-    def temp_bids_dataset(self):
-        """Create a temporary BIDS-compliant dataset for testing."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_path = Path(temp_dir)
-            
-            # Create dataset_description.json
-            desc = {
-                "Name": "Test BIDS Dataset",
-                "BIDSVersion": "1.4.0",
-                "Authors": ["Test Author"],
-                "HowToAcknowledge": "Cite this dataset"
-            }
-            with open(temp_path / "dataset_description.json", "w") as f:
-                json.dump(desc, f)
-            
-            # Create participants.tsv
-            participants_data = {
-                "participant_id": ["sub-01", "sub-02"],
-                "age": [25, 30],
-                "sex": ["M", "F"]
-            }
-            participants_df = pd.DataFrame(participants_data)
-            participants_df.to_csv(temp_path / "participants.tsv", sep="\t", index=False)
-            
-            # Create subject directories
-            for sub_id in ["sub-01", "sub-02"]:
-                sub_dir = temp_path / sub_id
-                sub_dir.mkdir()
-                
-                # Create session directory
-                ses_dir = sub_dir / "ses-01"
-                ses_dir.mkdir()
-                
-                # Create modality directories
-                for modality in ["anat", "func"]:
-                    mod_dir = ses_dir / modality
-                    mod_dir.mkdir()
-                    
-                    # Create dummy NIfTI file
-                    nii_file = mod_dir / f"{sub_id}_ses-01_T1w.nii.gz"
-                    nii_file.touch()
-                    
-                    # Create JSON metadata file
-                    json_file = mod_dir / f"{sub_id}_ses-01_T1w.json"
-                    metadata = {
-                        "RepetitionTime": 2.0,
-                        "EchoTime": 0.03,
-                        "FlipAngle": 90
-                    }
-                    with open(json_file, "w") as f:
-                        json.dump(metadata, f)
-            
-            yield temp_path
     
     def test_initialization_valid_dataset(self, temp_bids_dataset):
         """Test initialization with a valid BIDS dataset."""
@@ -89,7 +82,7 @@ class TestBIDSDatasetLoader:
         with pytest.raises(FileNotFoundError):
             BIDSDatasetLoader("/nonexistent/path")
     
-    def test_validation_missing_dataset_description(self):
+    def test_validation_missing_dataset_description(self, temp_bids_dataset):
         """Test validation when dataset_description.json is missing."""
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
@@ -102,7 +95,7 @@ class TestBIDSDatasetLoader:
             assert len(loader.validation_errors) > 0
             assert any("dataset_description.json" in error for error in loader.validation_errors)
     
-    def test_validation_invalid_json(self):
+    def test_validation_invalid_json(self, temp_bids_dataset):
         """Test validation with invalid JSON in dataset_description.json."""
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
@@ -115,7 +108,7 @@ class TestBIDSDatasetLoader:
             assert len(loader.validation_errors) > 0
             assert any("Invalid JSON" in error for error in loader.validation_errors)
     
-    def test_validation_missing_required_fields(self):
+    def test_validation_missing_required_fields(self, temp_bids_dataset):
         """Test validation when required fields are missing."""
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
@@ -129,7 +122,7 @@ class TestBIDSDatasetLoader:
             assert len(loader.validation_errors) > 0
             assert any("BIDSVersion" in error for error in loader.validation_errors)
     
-    def test_validation_unsupported_bids_version(self):
+    def test_validation_unsupported_bids_version(self, temp_bids_dataset):
         """Test validation with unsupported BIDS version."""
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)

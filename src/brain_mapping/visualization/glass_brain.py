@@ -6,12 +6,21 @@ This module provides 2D glass brain projections for neuroimaging data
 as part of Phase 1 visualization capabilities.
 """
 
-import numpy as np
-import matplotlib.pyplot as plt
 from pathlib import Path
-from typing import Union, Optional, Tuple, Dict, List
+from typing import Dict, List, Optional, Tuple, Union
+
+import matplotlib.pyplot as plt
 import nibabel as nib
+import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
+
+from brain_mapping.visualization.utils import (
+    axial_projection,
+    coronal_projection,
+    load_stat_map_data,
+    sagittal_projection,
+)
+
 from ..utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -75,7 +84,7 @@ class GlassBrainProjector:
             colormap = self.default_colormap
         
         # Load data
-        data = self._load_data(statistical_map)
+        data = load_stat_map_data(statistical_map)
         
         # Apply threshold
         if threshold > 0:
@@ -91,13 +100,13 @@ class GlassBrainProjector:
             ax = fig.add_subplot(1, n_views, i + 1)
             
             if view == 'sagittal':
-                projection = self._sagittal_projection(data)
+                projection = sagittal_projection(data)
                 ax.set_title('Sagittal View')
             elif view == 'coronal':
-                projection = self._coronal_projection(data)
+                projection = coronal_projection(data)
                 ax.set_title('Coronal View')
             elif view == 'axial':
-                projection = self._axial_projection(data)
+                projection = axial_projection(data)
                 ax.set_title('Axial View')
             else:
                 logger.warning(f"Unknown view: {view}")
@@ -122,44 +131,6 @@ class GlassBrainProjector:
         
         logger.info(f"Glass brain projection created with {len(views)} views")
         return fig
-    
-    def _load_data(self, statistical_map: Union[str, Path, np.ndarray, nib.Nifti1Image]) -> np.ndarray:
-        """Load statistical map data."""
-        if isinstance(statistical_map, np.ndarray):
-            return statistical_map
-        elif isinstance(statistical_map, nib.Nifti1Image):
-            return statistical_map.get_fdata()
-        else:
-            # Load from file
-            img = nib.load(str(statistical_map))
-            return img.get_fdata()
-    
-    def _sagittal_projection(self, data: np.ndarray) -> np.ndarray:
-        """Create sagittal (left-right) maximum intensity projection."""
-        if len(data.shape) == 4:
-            data = np.mean(data, axis=-1)  # Average across time if 4D
-        
-        # Maximum intensity projection across x-axis
-        projection = np.max(data, axis=0)
-        return np.rot90(projection)  # Rotate for proper orientation
-    
-    def _coronal_projection(self, data: np.ndarray) -> np.ndarray:
-        """Create coronal (front-back) maximum intensity projection."""
-        if len(data.shape) == 4:
-            data = np.mean(data, axis=-1)
-        
-        # Maximum intensity projection across y-axis
-        projection = np.max(data, axis=1)
-        return np.rot90(projection)
-    
-    def _axial_projection(self, data: np.ndarray) -> np.ndarray:
-        """Create axial (top-bottom) maximum intensity projection."""
-        if len(data.shape) == 4:
-            data = np.mean(data, axis=-1)
-        
-        # Maximum intensity projection across z-axis
-        projection = np.max(data, axis=2)
-        return projection
     
     def create_comparison_plot(self,
                               maps: Dict[str, Union[str, Path, np.ndarray, nib.Nifti1Image]],
@@ -190,7 +161,7 @@ class GlassBrainProjector:
             axes = [axes]
         
         for i, (label, statistical_map) in enumerate(maps.items()):
-            data = self._load_data(statistical_map)
+            data = load_stat_map_data(statistical_map)
             
             # Apply threshold
             if threshold > 0:
@@ -198,11 +169,11 @@ class GlassBrainProjector:
             
             # Create projection
             if view == 'sagittal':
-                projection = self._sagittal_projection(data)
+                projection = sagittal_projection(data)
             elif view == 'coronal':
-                projection = self._coronal_projection(data)
+                projection = coronal_projection(data)
             else:  # axial
-                projection = self._axial_projection(data)
+                projection = axial_projection(data)
             
             # Display
             im = axes[i].imshow(projection, cmap=self.default_colormap, interpolation='bilinear')

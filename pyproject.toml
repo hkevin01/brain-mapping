@@ -153,14 +153,7 @@ ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = [
-    "--strict-markers",
-    "--strict-config",
-    "--cov=brain_mapping",
-    "--cov-report=term-missing",
-    "--cov-report=html",
-    "--cov-report=xml",
-]
+addopts = ["--strict-markers", "--strict-config"]
 testpaths = ["tests"]
 filterwarnings = ["error", "ignore::UserWarning", "ignore::DeprecationWarning"]
 

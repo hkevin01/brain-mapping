@@ -7,7 +7,8 @@ data using VTK and Mayavi backends.
 """
 
 import warnings
-from typing import Optional, Union, Dict, Any
+from typing import Any, Dict, Optional
+
 import numpy as np
 
 try:
@@ -23,6 +24,155 @@ try:
 except ImportError:
     MAYAVI_AVAILABLE = False
     warnings.warn("Mayavi not available. Some visualization features disabled.")
+
+import logging
+
+from brain_mapping.visualization.utils import create_slice_actor, numpy_to_vtk_image
+
+logger = logging.getLogger(__name__)
+
+
+class BaseVisualizer:
+    """
+    Abstract base class for 3D visualization backends.
+    """
+    def __init__(self):
+        self.actors = []
+
+    def set_data(self, data: np.ndarray):
+        raise NotImplementedError
+
+    def render(self):
+        raise NotImplementedError
+
+    def save(self, filename: str):
+        raise NotImplementedError
+
+    def clear_scene(self):
+        self.actors.clear()
+
+    def show(self):
+        raise NotImplementedError
+
+
+class VTKVisualizer(BaseVisualizer):
+    """
+    VTK-based 3D visualizer for brain imaging data.
+    """
+    def __init__(self):
+        super().__init__()
+        if not VTK_AVAILABLE:
+            raise ImportError("VTK not available for VTKVisualizer")
+        self.renderer = vtk.vtkRenderer()
+        self.render_window = vtk.vtkRenderWindow()
+        self.render_window.AddRenderer(self.renderer)
+        self.render_window.SetSize(800, 600)
+        self.renderer.SetBackground(0.1, 0.1, 0.1)
+
+    def set_data(self, data: np.ndarray):
+        self.data = data
+
+    def render_brain_surface(self, threshold: Optional[float] = None,
+                            color: tuple = (0.8, 0.8, 0.9),
+                            opacity: float = 0.7) -> bool:
+        try:
+            vtk_data = numpy_to_vtk_image(self.data)
+            if threshold is None:
+                threshold = np.max(self.data) * 0.3
+            marching_cubes = vtk.vtkMarchingCubes()
+            marching_cubes.SetInputData(vtk_data)
+            marching_cubes.SetValue(0, threshold)
+            marching_cubes.Update()
+            cleaner = vtk.vtkCleanPolyData()
+            cleaner.SetInputConnection(marching_cubes.GetOutputPort())
+            cleaner.Update()
+            mapper = vtk.vtkPolyDataMapper()
+            mapper.SetInputConnection(cleaner.GetOutputPort())
+            actor = vtk.vtkActor()
+            actor.SetMapper(mapper)
+            actor.GetProperty().SetColor(color)
+            actor.GetProperty().SetOpacity(opacity)
+            self.renderer.AddActor(actor)
+            self.actors.append(actor)
+            return True
+        except Exception as e:
+            logger.error(f"Failed to render brain surface: {e}")
+            return False
+
+    def add_slice_planes(self, x_slice: Optional[int] = None,
+                        y_slice: Optional[int] = None,
+                        z_slice: Optional[int] = None) -> bool:
+        try:
+            vtk_data = numpy_to_vtk_image(self.data)
+            shape = self.data.shape
+            slices = {
+                'x': x_slice or shape[0] // 2,
+                'y': y_slice or shape[1] // 2,
+                'z': z_slice or shape[2] // 2
+            }
+            for plane, slice_idx in slices.items():
+                if slice_idx is not None:
+                    actor = create_slice_actor(vtk_data, plane, slice_idx)
+                    if actor:
+                        self.renderer.AddActor(actor)
+                        self.actors.append(actor)
+            return True
+        except Exception as e:
+            logger.error(f"Failed to add slice planes: {e}")
+            return False
+
+    def render(self):
+        self.render_window.Render()
+
+    def show(self):
+        interactor = vtk.vtkRenderWindowInteractor()
+        interactor.SetRenderWindow(self.render_window)
+        style = vtk.vtkInteractorStyleTrackballCamera()
+        interactor.SetInteractorStyle(style)
+        self.render_window.Render()
+        interactor.Start()
+
+    def save(self, filename: str, width: int = 1920, height: int = 1080):
+        self.render_window.SetSize(width, height)
+        self.render_window.Render()
+        screenshot = vtk.vtkWindowToImageFilter()
+        screenshot.SetInput(self.render_window)
+        screenshot.Update()
+        writer = vtk.vtkPNGWriter()
+        writer.SetFileName(filename)
+        writer.SetInputConnection(screenshot.GetOutputPort())
+        writer.Write()
+
+    def clear_scene(self):
+        self.renderer.RemoveAllViewProps()
+        super().clear_scene()
+
+
+class MayaviVisualizer(BaseVisualizer):
+    """
+    Mayavi-based 3D visualizer for brain imaging data.
+    """
+    def __init__(self):
+        super().__init__()
+        if not MAYAVI_AVAILABLE:
+            raise ImportError("Mayavi not available for MayaviVisualizer")
+        # Placeholder for Mayavi initialization
+        self.data = None
+
+    def set_data(self, data: np.ndarray):
+        self.data = data
+
+    def render(self):
+        if self.data is not None:
+            print(f"Mayavi render: shape={self.data.shape}")
+        else:
+            print("Mayavi render: no data set")
+
+    def show(self):
+        print("Mayavi show (not implemented)")
+
+    def save(self, filename: str):
+        print(f"Saving Mayavi visualization to {filename}")
 
 
 class Visualizer:
@@ -223,8 +373,6 @@ class Visualizer:
             warnings.warn("VTK not available for image conversion")
             return None
             
-        return vtk.vtkImageData()
-        """Convert numpy array to VTK image data."""
         vtk_data = vtk.vtkImageData()
         vtk_data.SetDimensions(data.shape)
         vtk_data.SetSpacing(1.0, 1.0, 1.0)
@@ -251,8 +399,6 @@ class Visualizer:
             warnings.warn("VTK not available for slice actor creation")
             return None
             
-        return vtk.vtkActor()
-        """Create a slice plane actor."""
         try:
             # Create cutting plane
             plane_obj = vtk.vtkPlane()

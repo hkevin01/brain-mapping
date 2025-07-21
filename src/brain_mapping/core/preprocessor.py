@@ -7,7 +7,8 @@ data including motion correction, normalization, filtering, and quality control.
 """
 
 import warnings
-from typing import Union, Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
+
 import numpy as np
 import scipy.ndimage  # Ensure scipy.ndimage is available for CPU smoothing
 
@@ -222,8 +223,8 @@ class MotionCorrectionPlugin(PreprocessingPlugin):
                 return img
             
             # Save temporary input file
-            import tempfile
             import os
+            import tempfile
             from pathlib import Path
             
             with tempfile.TemporaryDirectory() as temp_dir:
@@ -345,7 +346,7 @@ class Preprocessor:
         """Custom pipeline using registered plugins."""
         if not self.plugins:
             warnings.warn("No plugins registered for custom pipeline. Returning original image.")
-            return img
+        return img
         
         current_img = img
         for i, plugin in enumerate(self.plugins):

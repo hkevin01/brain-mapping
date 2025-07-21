@@ -70,6 +70,10 @@ ipython_config.py
 # VS Code
 .vscode/
 
+# Node.js dependencies
+node_modules/
+package-lock.json
+
 # OS files
 .DS_Store
 Thumbs.db
@@ -80,3 +84,22 @@ brain_mapping.log
 
 # Demo notebooks
 demo_phase*.ipynb 
+
+# Project logs and test outputs
+logs/
+logs/*.log
+logs/CHANGELOG_AUTOMATED.md
+logs/test_suite_output_*.log
+logs/copilot/
+
+# Copilot and config files
+.copilot/
+.copilot/config.json
+
+# Test and report files
+*.log
+*.json 
+
+# IDE / Editor specific
+.idea/
+*.iml 
