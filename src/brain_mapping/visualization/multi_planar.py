@@ -1,12 +1,12 @@
 """
-Multi-planar Reconstruction Module
-=================================
+Multi-Planar Visualization Module
+================================
 
-This module provides multi-planar reconstruction capabilities for 3D brain images
-as part of Phase 1 visualization features.
+Provides multi-planar reconstruction and visualization for neuroimaging data.
 """
 
 import numpy as np
+import logging
 import matplotlib.pyplot as plt
 from pathlib import Path
 from typing import Union, Optional, Tuple, List
@@ -22,7 +22,7 @@ except ImportError:
 
 class MultiPlanarReconstructor:
     """
-    Multi-planar reconstruction for 3D brain visualization.
+    Multi-planar reconstruction for 3D neuroimaging data.
     
     Phase 1 Features:
     - Orthogonal slice views (sagittal, coronal, axial)
@@ -403,3 +403,12 @@ def quick_slice_montage(image_data: Union[str, Path, np.ndarray, nib.Nifti1Image
         mpr.save_views(fig, output_path)
     
     return fig
+
+
+# Usage Example
+if __name__ == "__main__":
+    data = np.random.rand(32, 32, 32)
+    recon = MultiPlanarReconstructor(data)
+    print(recon.get_sagittal(10).shape)
+    print(recon.get_coronal(10).shape)
+    print(recon.get_axial(10).shape)

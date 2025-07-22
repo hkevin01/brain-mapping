@@ -460,3 +460,38 @@ def compare_activations(maps: Dict[str, Union[str, Path, np.ndarray, nib.Nifti1I
         projector.save_projection(fig, output_path)
     
     return fig
+
+"""
+Glass Brain Visualization Module
+===============================
+
+Provides glass brain projections for neuroimaging visualization.
+"""
+import numpy as np
+import logging
+
+class GlassBrainProjector:
+    """
+    Glass brain projection for 3D neuroimaging data.
+    """
+    def __init__(self, data: np.ndarray):
+        self.data = data
+    def project(self, axis: str = 'z'):
+        if axis not in ['x', 'y', 'z']:
+            logging.warning(f"Invalid axis {axis} for projection.")
+            return None
+        axis_map = {'x': 0, 'y': 1, 'z': 2}
+        return np.max(self.data, axis=axis_map[axis])
+    def visualize(self, axis: str = 'z'):
+        proj = self.project(axis)
+        if proj is not None:
+            # Visualization stub: integrate with matplotlib or renderer
+            print(f"Glass brain projection on axis {axis} shape: {proj.shape}")
+        else:
+            print(f"Failed to project glass brain on axis {axis}")
+
+# Usage Example
+if __name__ == "__main__":
+    data = np.random.rand(32, 32, 32)
+    projector = GlassBrainProjector(data)
+    projector.visualize('z')

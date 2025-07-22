@@ -13,6 +13,7 @@ import json
 import time
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
+import logging
 
 try:
     import boto3
@@ -41,7 +42,7 @@ except ImportError:
 
 class CloudProcessor:
     """
-    Cloud-based processing and collaboration for brain mapping workflows.
+    Handles cloud-based dataset upload and processing.
     
     This class provides comprehensive cloud integration including data upload,
     distributed processing, result sharing, and cost optimization.
@@ -470,7 +471,7 @@ class CloudProcessor:
 
 class CloudCollaboration:
     """
-    Real-time collaboration features for cloud-based brain mapping.
+    Manages collaborative features for cloud-based workflows.
     """
     
     def __init__(self, cloud_processor: CloudProcessor):
@@ -565,3 +566,11 @@ class CloudCollaboration:
             List of active sessions
         """
         return list(self.active_sessions.values())
+
+# Usage Example
+if __name__ == "__main__":
+    processor = CloudProcessor('aws')
+    try:
+        processor.upload_dataset('local.txt', 'cloud.txt')
+    except Exception as e:
+        print(f"Error: {e}")

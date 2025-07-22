@@ -36,17 +36,29 @@ class MLAnalyzer:
     - Real-time decoding
     """
     
-    def __init__(self, gpu_enabled: bool = True):
+    def __init__(self, model_type: str = 'sklearn', gpu_enabled: bool = True):
         """
         Initialize MLAnalyzer.
         
         Parameters
         ----------
+        model_type : str, default='sklearn'
+            Type of model to use ('sklearn' or 'torch')
         gpu_enabled : bool, default=True
             Whether to use GPU acceleration for deep learning
         """
+        self.model_type = model_type
         self.gpu_enabled = gpu_enabled
-        
+        self.model = None
+        if model_type == 'sklearn' and SKLEARN_AVAILABLE:
+            from sklearn.ensemble import RandomForestClassifier
+            self.model = RandomForestClassifier()
+        elif model_type == 'torch' and PYTORCH_AVAILABLE:
+            import torch.nn as nn
+            self.model = nn.Linear(10, 1)  # Example
+        else:
+            self.model = None
+
     def classify(self, X: np.ndarray, y: np.ndarray,
                 classifier: str = 'svm') -> Dict:
         """
@@ -97,3 +109,108 @@ class MLAnalyzer:
         """
         # Placeholder implementation
         return np.random.rand(*data.shape[:3])
+    
+    def fit(self, X, y):
+        """
+        Fit the model to the data.
+        
+        Parameters
+        ----------
+        X : numpy.ndarray
+            Feature matrix
+        y : numpy.ndarray
+            Target labels
+        """
+        if self.model is not None:
+            return self.model.fit(X, y)
+        else:
+            raise ValueError("No valid model available for fitting.")
+    
+    def predict(self, X):
+        """
+        Predict using the fitted model.
+        
+        Parameters
+        ----------
+        X : numpy.ndarray
+            Feature matrix to predict on
+        
+        Returns
+        -------
+        numpy.ndarray
+            Predicted labels
+        """
+        if self.model is not None:
+            return self.model.predict(X)
+        else:
+            raise ValueError("No valid model available for prediction.")
+    
+    def interpret(self, X):
+        """
+        Interpret the model predictions.
+        
+        Parameters
+        ----------
+        X : numpy.ndarray
+            Feature matrix
+        
+        Returns
+        -------
+        numpy.ndarray or None
+            SHAP values or None if interpretation fails
+        """
+        if self.model_type == 'sklearn' and SKLEARN_AVAILABLE:
+            try:
+                import shap
+                explainer = shap.Explainer(self.model, X)
+                return explainer.shap_values(X)
+            except Exception as e:
+                warnings.warn(f"Interpretation failed: {e}")
+                return None
+        else:
+            return None
+    
+    def run_classifier(self, data: np.ndarray, labels: np.ndarray):
+        """
+        Run classifier on the data.
+        
+        Parameters
+        ----------
+        data : numpy.ndarray
+            Input data
+        labels : numpy.ndarray
+            Corresponding labels
+        
+        Returns
+        -------
+        object or None
+            Trained classifier object or None if sklearn is not available
+        """
+        if SKLEARN_AVAILABLE:
+            from sklearn.ensemble import RandomForestClassifier
+            clf = RandomForestClassifier()
+            clf.fit(data, labels)
+            return clf
+        else:
+            return None
+
+    def run_deep_learning(self, data: np.ndarray):
+        """
+        Run deep learning model on the data.
+        
+        Parameters
+        ----------
+        data : numpy.ndarray
+            Input data
+        
+        Returns
+        -------
+        object or None
+            Deep learning model object or None if PyTorch is not available
+        """
+        if PYTORCH_AVAILABLE:
+            import torch.nn as nn
+            model = nn.Linear(data.shape[1], 2)
+            return model
+        else:
+            return None

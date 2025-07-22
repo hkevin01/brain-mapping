@@ -243,3 +243,44 @@ class Preprocessor:
         for plugin in self.plugins:
             img = plugin.run(img, **kwargs)
         return img
+    
+    def normalize(self, img):
+        """
+        Normalize the image intensity to a range of [0, 1].
+        
+        Parameters
+        ----------
+        img : nibabel.Nifti1Image
+            Input brain image
+            
+        Returns
+        -------
+        nibabel.Nifti1Image
+            Normalized image
+        """
+        # Example normalization: min-max
+        min_val = np.min(img)
+        max_val = np.max(img)
+        norm_img = (img - min_val) / (max_val - min_val)
+        provenance_tracker.log_event("normalize", {"min": float(min_val), "max": float(max_val)})
+        return norm_img
+    
+    def register(self, img, reference):
+        """
+        Register the image to a reference image (e.g., MNI space).
+        
+        Parameters
+        ----------
+        img : nibabel.Nifti1Image
+            Input brain image
+        reference : nibabel.Nifti1Image
+            Reference image for registration
+            
+        Returns
+        -------
+        nibabel.Nifti1Image
+            Registered image
+        """
+        # Example registration: identity (placeholder)
+        provenance_tracker.log_event("register", {"reference": str(reference)})
+        return img

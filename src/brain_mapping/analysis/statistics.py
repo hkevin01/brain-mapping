@@ -19,7 +19,7 @@ except ImportError:
 
 class StatisticalAnalyzer:
     """
-    Statistical analysis tools for brain imaging data.
+    Statistical analysis for neuroimaging data.
     
     Supports:
     - General Linear Model (GLM) analysis
@@ -149,7 +149,9 @@ class StatisticalAnalyzer:
 
 
 class ConnectivityAnalyzer:
-    """Functional and structural connectivity analysis."""
+    """
+    Functional and structural connectivity analysis.
+    """
     
     def __init__(self):
         self.correlation_matrix = None

@@ -111,4 +111,4 @@ def axial_projection(data: np.ndarray) -> np.ndarray:
     if data.ndim == 4:
         data = np.mean(data, axis=-1)
     projection = np.max(data, axis=2)
-    return projection 
+    return projection

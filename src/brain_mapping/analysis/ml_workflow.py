@@ -67,26 +67,22 @@ class MLWorkflowManager:
     Supports scikit-learn and PyTorch models, plugin integration, and
     extensibility.
     """
-    def __init__(self, model_type: str = 'sklearn', model: Optional[Any] = None):
+    def __init__(self, model_type: str = 'auto'):
         """
         Initialize MLWorkflowManager.
 
         Parameters
         ----------
-        model_type : str, default='sklearn'
+        model_type : str, default='auto'
             Type of model ('sklearn', 'torch', or 'custom')
-        model : object, optional
-            Pre-initialized model instance
         """
         self.model_type: str = model_type
-        self.model: Optional[Any] = model
-        self.plugins = PluginManager()
+        self.models = self._load_models()
+        self.plugins = []
         logger.info(
             f"MLWorkflowManager initialized with model_type={model_type}"
         )
         self._validate_dependencies()
-        if self.model is None:
-            self.model = self._initialize_default_model()
 
     def _validate_dependencies(self) -> None:
         if self.model_type == 'sklearn' and not SKLEARN_AVAILABLE:
@@ -98,33 +94,30 @@ class MLWorkflowManager:
                 "PyTorch is required for 'torch' model_type."
             )
 
-    def _initialize_default_model(self) -> Optional[Any]:
-        if self.model_type == 'sklearn' and SKLEARN_AVAILABLE:
-            return sklearn.linear_model.LogisticRegression()
-        if self.model_type == 'torch' and TORCH_AVAILABLE:
-            # Placeholder: input/output dims must be set at training time
-            class SimpleNN(nn.Module):
-                def __init__(self, input_dim: int, output_dim: int):
-                    super().__init__()
-                    self.fc = nn.Linear(input_dim, output_dim)
-
-                def forward(self, x):
-                    return self.fc(x)
-            return None  # Will be initialized at training time
-        return None
+    def _load_models(self):
+        if self.model_type == 'auto':
+            return {'auto': None}
+        elif self.model_type == 'sklearn':
+            from sklearn.ensemble import RandomForestClassifier
+            return {'sklearn': RandomForestClassifier()}
+        elif self.model_type == 'torch':
+            import torch
+            return {'torch': torch.nn.Linear(10, 2)}
+        else:
+            raise ImportError(f"Unknown model type: {self.model_type}")
 
     def register_plugin(self, plugin: Callable) -> None:
         """
         Register a plugin callable to be used in the workflow.
         """
-        self.plugins.register(plugin)
+        self.plugins.append(plugin)
 
     def _validate_data(self, data: np.ndarray) -> None:
         if not isinstance(data, np.ndarray):
             logger.error("Input data must be a numpy ndarray.")
             raise MLWorkflowError("Input data must be a numpy ndarray.")
 
-    def automated_analysis(self, data: np.ndarray) -> Dict[str, Any]:
+    def automated_analysis(self, data: np.ndarray):
         """
         Run automated ML analysis pipeline.
 
@@ -140,25 +133,24 @@ class MLWorkflowManager:
         """
         logger.info("Running automated analysis")
         self._validate_data(data)
-        if self.model_type == 'sklearn' and SKLEARN_AVAILABLE:
+        if self.model_type == 'auto':
             from sklearn.ensemble import RandomForestClassifier
             clf = RandomForestClassifier()
-            try:
-                clf.fit(data, np.zeros(data.shape[0]))
-                return {"status": "success", "result": clf}
-            except Exception as e:
-                logger.error(f"Automated analysis failed: {e}")
-                return {"status": "error", "error": str(e)}
-        elif self.model_type == 'torch' and TORCH_AVAILABLE:
-            # Implement torch-based analysis here
-            return {"status": "not_implemented", "result": None}
+            return {'status': 'success', 'model': clf.fit(data)}
+        elif self.model_type == 'sklearn':
+            clf = self.models['sklearn']
+            return {'status': 'success', 'model': clf.fit(data)}
+        elif self.model_type == 'torch':
+            model = self.models['torch']
+            import torch
+            x = torch.tensor(data, dtype=torch.float32)
+            return {'status': 'success', 'output': model(x)}
         else:
-            logger.error("No valid model or model_type for automated analysis.")
-            return {"status": "error", "error": "No valid model or model_type."}
+            return {'status': 'error'}
 
     def custom_training(
         self, training_data: np.ndarray, labels: np.ndarray
-    ) -> Optional[Any]:
+    ):
         """
         Train a custom model on user data.
 
@@ -177,26 +169,13 @@ class MLWorkflowManager:
         logger.info("Running custom training")
         self._validate_data(training_data)
         self._validate_data(labels)
-        if (
-            self.model_type == 'sklearn' and SKLEARN_AVAILABLE and self.model is not None
-        ):
-            try:
-                self.model.fit(training_data, labels)
-                logger.info("Training complete.")
-                return self.model
-            except Exception as e:
-                logger.error(f"Custom training failed: {e}")
-                return None
-        elif self.model_type == 'torch' and TORCH_AVAILABLE:
-            logger.warning("Torch custom training not implemented.")
-            return None
-        else:
-            logger.error(
-                "No valid model or model_type for custom training."
-            )
-            return None
+        from sklearn.ensemble import RandomForestClassifier
+        clf = RandomForestClassifier()
+        clf.fit(training_data, labels)
+        self.models['custom'] = clf
+        return clf
 
-    def predict(self, data: np.ndarray) -> Optional[np.ndarray]:
+    def predict(self, data: np.ndarray):
         """
         Run inference using the trained model.
 
@@ -212,28 +191,17 @@ class MLWorkflowManager:
         """
         logger.info("Running prediction")
         self._validate_data(data)
-        if (
-            self.model_type == 'sklearn' and SKLEARN_AVAILABLE and self.model is not None
-        ):
-            try:
-                return self.model.predict(data)
-            except Exception as e:
-                logger.error(f"Prediction failed: {e}")
-                return None
-        elif (
-            self.model_type == 'torch' and TORCH_AVAILABLE and self.model is not None
-        ):
-            logger.warning("Torch prediction not implemented.")
-            return None
+        if self.model_type == 'sklearn':
+            clf = self.models['sklearn']
+            return clf.predict(data)
+        elif self.model_type == 'auto' and 'custom' in self.models:
+            return self.models['custom'].predict(data)
         else:
-            logger.error(
-                "No valid model or model_type for prediction."
-            )
-            return None
+            raise ImportError("No valid model for prediction")
 
     def model_interpretation(
-        self, model: Any, data: np.ndarray
-    ) -> Dict[str, Any]:
+        self, model, data: np.ndarray
+    ):
         """
         Generate interpretable results from ML models.
 
@@ -251,18 +219,12 @@ class MLWorkflowManager:
         """
         logger.info("Running model interpretation")
         self._validate_data(data)
-        if self.model_type == 'sklearn' and SKLEARN_AVAILABLE:
-            try:
-                import shap
-                explainer = shap.Explainer(model, data)
-                shap_values = explainer.shap_values(data)
-                return {"status": "success", "shap_values": shap_values}
-            except Exception as e:
-                logger.error(f"Model interpretation failed: {e}")
-                return {"status": "error", "error": str(e)}
-        else:
-            logger.error("No valid model or model_type for interpretation.")
-            return {"status": "error", "error": "No valid model or model_type."}
+        try:
+            import shap
+            explainer = shap.Explainer(model, data)
+            return explainer.shap_values(data)
+        except ImportError:
+            return None
 
     def as_plugin(self) -> Callable:
         """
@@ -273,11 +235,11 @@ class MLWorkflowManager:
         object
             Plugin-compatible callable
         """
-        def plugin_run(img: Any, **kwargs) -> Any:
-            logger.info("MLWorkflowManager plugin called")
-            return self.plugins.run_plugins(img, **kwargs)
-
-        return plugin_run
+        def plugin_fn(data, **kwargs):
+            for plugin in self.plugins:
+                data = plugin(data, **kwargs)
+            return data
+        return plugin_fn
 
 def run_ml_pipeline(data, labels=None):
     """Run a basic ML pipeline (example: fit RandomForest if labels provided)."""

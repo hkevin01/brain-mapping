@@ -173,30 +173,33 @@ class MayaviVisualizer(BaseVisualizer):
         self.data = data
 
     def render(self):
-        if self.data is not None:
-            print(f"Mayavi render: shape={self.data.shape}")
+        if hasattr(self, 'mayavi') and self.mayavi:
+            self.mayavi.figure(bgcolor=(0, 0, 0))
+            print("Rendering with Mayavi.")
         else:
-            print("Mayavi render: no data set")
+            print("Mayavi not initialized. Cannot render.")
 
     def show(self):
-        print("Mayavi show (not implemented)")
+        if hasattr(self, 'mayavi') and self.mayavi:
+            self.mayavi.show()
+        else:
+            print("Mayavi not initialized. Cannot show visualization.")
 
     def save(self, filename: str):
         print(f"Saving Mayavi visualization to {filename}")
 
+    def clear_scene(self):
+        if hasattr(self, 'mayavi') and self.mayavi:
+            self.mayavi.clf()
+            print("Scene cleared.")
+        else:
+            print("Mayavi not initialized. Cannot clear scene.")
+
 
 class Visualizer:
     """
-    Advanced 3D visualization for brain imaging data.
-    
-    Supports:
-    - Interactive 3D brain rendering
-    - Statistical overlay visualization
-    - Glass brain projections
-    - Time series animations
-    - Multi-planar reconstruction
+    3D renderer for neuroimaging data using VTK/Mayavi.
     """
-    
     def __init__(self, backend: str = 'vtk'):
         """
         Initialize Visualizer.
@@ -233,9 +236,17 @@ class Visualizer:
         self.actors = []
         
     def _init_mayavi(self):
-        """Initialize Mayavi rendering components."""
-        # Placeholder for Mayavi initialization
-        pass
+        try:
+            import mayavi.mlab
+            self.mayavi = mayavi.mlab
+        except ImportError:
+            self.mayavi = None
+            print("Mayavi not available. Visualization features limited.")
+
+    def set_data(self, data: np.ndarray):
+        self.data = data
+        # Stub: integrate with VTK/Mayavi
+        logging.info(f"Data set for visualization. Shape: {data.shape}")
     
     def render_brain_surface(self, image_data: np.ndarray, 
                            threshold: Optional[float] = None,
@@ -462,6 +473,9 @@ class Visualizer:
             
             self.render_window.Render()
             interactor.Start()
+        else:
+            print("Starting interactive visualization...")
+            self.show()
     
     def save_screenshot(self, filename: str, width: int = 1920, height: int = 1080):
         """Save screenshot of current view."""
@@ -483,6 +497,11 @@ class Visualizer:
         if hasattr(self, 'renderer'):
             self.renderer.RemoveAllViewProps()
             self.actors.clear()
+        if hasattr(self, 'mayavi') and self.mayavi:
+            self.mayavi.clf()
+            print("Scene cleared.")
+        else:
+            print("Mayavi not initialized. Cannot clear scene.")
         
     def _check_backend_availability(self):
         """Check if selected backend is available."""
@@ -490,6 +509,16 @@ class Visualizer:
             raise ImportError("VTK required for vtk backend")
         elif self.backend == 'mayavi' and not MAYAVI_AVAILABLE:
             raise ImportError("Mayavi required for mayavi backend")
+        try:
+            import vtk
+            print("VTK available.")
+        except ImportError:
+            print("VTK not available.")
+        try:
+            import mayavi
+            print("Mayavi available.")
+        except ImportError:
+            print("Mayavi not available.")
     
     def plot_brain_3d(self, 
                       data: np.ndarray, 

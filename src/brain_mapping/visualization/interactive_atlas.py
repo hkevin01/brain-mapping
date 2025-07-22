@@ -494,13 +494,64 @@ class InteractiveBrainAtlas:
 
 
 class InteractiveAtlas:
-    def __init__(self):
+    """
+    Interactive atlas for region selection and navigation.
+    """
+    def __init__(self, atlas_data: np.ndarray):
+        """
+        Initialize the interactive atlas.
+        
+        Parameters
+        ----------
+        atlas_data : np.ndarray
+            3D array representing the atlas regions
+        """
+        self.atlas_data = atlas_data
         self.selected_region = None
-    def select_region(self, region_id):
+    
+    def select_region(self, region_id: int):
+        """
+        Select a region by its identifier.
+        
+        Parameters
+        ----------
+        region_id : int
+            Identifier of the region to select
+            
+        Returns
+        -------
+        bool
+            True if the region was successfully selected, False if out of bounds
+        """
+        if region_id < 0 or region_id >= self.atlas_data.max():
+            logging.warning(f"Region {region_id} out of bounds.")
+            return False
         self.selected_region = region_id
-        print(f"Selected region: {region_id}")
-    def visualize_selected(self):
-        print(f"Visualizing selected region: {self.selected_region}")
+        return True
+    
+    def get_region_mask(self):
+        """
+        Get the binary mask of the selected region.
+        
+        Returns
+        -------
+        np.ndarray
+            Binary mask array where the selected region is 1 and all else is 0
+        """
+        if self.selected_region is None:
+            return np.zeros_like(self.atlas_data)
+        return (self.atlas_data == self.selected_region).astype(np.uint8)
+    
+    def list_regions(self):
+        """
+        List all unique regions in the atlas.
+        
+        Returns
+        -------
+        np.ndarray
+            Array of unique region identifiers
+        """
+        return np.unique(self.atlas_data)
 
 
 # Convenience functions for quick atlas usage

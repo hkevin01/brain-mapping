@@ -1,20 +1,22 @@
 """
-BIDS Dataset Loader
-==================
+BIDS Dataset Loader and Validator
+================================
 
-This module provides comprehensive support for BIDS (Brain Imaging Data Structure)
-datasets, including validation, loading, and metadata management.
-
-BIDS is the community standard for organizing neuroimaging data and is widely
-adopted in the neuroscience community.
+Provides robust loading, validation, and metadata management for BIDS-compliant datasets.
 """
 
-import warnings
 from pathlib import Path
-from typing import Dict, List, Optional, Union, Any
+import logging
 import json
 import pandas as pd
 import numpy as np
+import os
+
+try:
+    from bids import BIDSLayout
+except ImportError:
+    BIDSLayout = None
+    logging.warning("pybids not available; BIDSLayout is a stub.")
 
 from .provenance import ProvenanceTracker
 
@@ -29,7 +31,7 @@ provenance_tracker = ProvenanceTracker()
 
 class BIDSDatasetLoader:
     """
-    Loader for BIDS-compliant neuroimaging datasets.
+    Loads and manages BIDS-compliant datasets.
     
     This class provides comprehensive support for loading and validating
     BIDS datasets, including participant metadata, session information,
@@ -60,7 +62,7 @@ class BIDSDatasetLoader:
         if validate:
             self.validate_bids()
         
-        if PY_BIDS_AVAILABLE:
+        if BIDSLayout:
             self._initialize_layout()
     
     def _initialize_layout(self):
@@ -310,9 +312,6 @@ class BIDSDatasetLoader:
         Dict[str, Any]
             Dictionary containing loaded data organized by modality
         """
-        if not NIBABEL_AVAILABLE:
-            raise ImportError("nibabel is required for loading BIDS data")
-        
         if not subject_id.startswith('sub-'):
             subject_id = f'sub-{subject_id}'
         
@@ -445,11 +444,29 @@ class BIDSDatasetLoader:
         }
         
         return info
+    
+    def generate_output(self, output_dir: str):
+        """Generate BIDS-compliant output files in the specified directory."""
+        import json
+        if not self.layout:
+            raise ImportError("pybids not available")
+        os.makedirs(output_dir, exist_ok=True)
+        participants = self.get_participants()
+        output_path = os.path.join(output_dir, "participants.json")
+        with open(output_path, "w") as f:
+            json.dump(participants, f, indent=2)
+        # Example: Save session info for each subject
+        for subj in participants:
+            subj_data = self.load_subject(subj["participant_id"])
+            subj_path = os.path.join(output_dir, f"{subj['participant_id']}_sessions.json")
+            with open(subj_path, "w") as sf:
+                json.dump([d.filename for d in subj_data], sf, indent=2)
+        return True
 
 
 class BIDSValidator:
     """
-    Standalone BIDS validator for datasets.
+    Validates BIDS datasets and provides error reporting.
     
     This class provides comprehensive BIDS validation without requiring
     pybids installation.
@@ -477,3 +494,19 @@ class BIDSValidator:
             'errors': loader.validation_errors,
             'dataset_info': loader.get_dataset_info()
         }
+    
+    def validate(self, dataset_path: str):
+        if not BIDSLayout:
+            raise ImportError("pybids not available")
+        layout = BIDSLayout(str(dataset_path))
+        return layout.validate()
+
+
+# Usage Example
+if __name__ == "__main__":
+    loader = BIDSDatasetLoader("/path/to/bids_dataset")
+    try:
+        print(loader.get_participants())
+        print(loader.validate_bids())
+    except Exception as e:
+        print(f"Error: {e}")
